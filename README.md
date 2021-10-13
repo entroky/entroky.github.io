@@ -1,2 +1,1 @@
-# entroky.github.io
-web
+# Beta stage
