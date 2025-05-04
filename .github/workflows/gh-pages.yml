@@ -1,0 +1,152 @@
+name: Deploy My forest to Pages
+
+on:
+  push:
+    paths-ignore:
+      - "LICENSE"
+      - "README.md"
+    branches:
+      - main
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+# Default to bash
+defaults:
+  run:
+    shell: bash
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: recursive
+      - uses: extractions/setup-just@v1
+        with:
+          just-version: 1.40.0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.1.29
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+            version: latest
+      - name: Lint
+        run: |
+          ./chk.sh
+      - name: Setup TeX Live
+        uses: teatimeguest/setup-texlive-action@v3
+        with:
+          packages: scheme-full
+      - name: Check `latex`
+        run: |
+          echo $GITHUB_PATH
+          tlmgr --version
+          which latex
+      - name: Cache WASM packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            lib/**/pkg
+          key: ${{ runner.os }}-wasm-${{ hashFiles('build.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-wasm-
+
+      - name: Cache HTML files
+        uses: actions/cache@v4
+        with:
+          path: output/*.html
+          key: ${{ runner.os }}-html-${{ hashFiles('output/*.xml', 'output/*.xsl') }}
+          restore-keys: |
+            ${{ runner.os }}-html-
+
+      - name: Setup Pages
+        if: ${{ !env.ACT }}
+        id: pages
+        uses: actions/configure-pages@v5
+      - name: Set-up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.3.0"
+          # dune-cache: true
+      # - name: Cache opam packages
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.opam
+      #     key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-opam-
+      - name: Install forester
+        run: |
+          sudo apt-get install libev-dev
+          opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --yes
+          opam install forester --yes
+          # opam install forester.4.3.1 --yes
+      # https://github.com/astral-sh/setup-uv
+      - name: Setup Python via uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.4.27"
+          # enable-cache: true
+      # - name: Install Homebrew
+      #   run: |
+      #     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      #     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+      #     echo "$(brew --prefix)/bin" >> $GITHUB_PATH
+      # - name: Install saxon
+      #   run: |
+      #     brew install saxon
+      - name: Build with forester
+        run: |
+          eval $(opam env)
+          export TERM=xterm-256color
+          forester --version
+          bash ./build.sh
+      - name: Check for PDF files
+        run: |
+          pdf_count=$(find ./output -name "*.pdf" | wc -l)
+          if [ "$pdf_count" -eq 0 ]; then
+            echo "Error: No PDF files found in the output directory."
+            exit 1
+          fi
+          echo "Found $pdf_count PDF files."
+      - name: Fix permissions
+        run: |
+          chmod -c -R +rX "./output/" | while read line; do
+            echo "::warning title=Invalid file permissions automatically fixed::$line"
+          done
+      - name: Upload Pages artifact
+        if: ${{ !env.ACT }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./output
+
+  # Deploy job
+  deploy:
+    # Add a dependency to the build job
+    needs: build
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
