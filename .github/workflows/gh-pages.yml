@@ -27,13 +27,26 @@ permissions:
 jobs:
   # Build job
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04 # ubuntu-latest is currently 22.04, but being explicit is fine
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: main
           submodules: recursive
+
+      # <<<--- ADDED STEP: Free up disk space early --->>>
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main # Use a specific commit SHA or tag for stability if preferred
+        with:
+
+          tool-cache: true # Changed from your example 'false' to 'true' to actually remove the tool cache
+          android: false
+          dotnet: false
+          haskell: false
+          large-packages: false
+          docker-images: true
+          swap-storage: true
       - uses: extractions/setup-just@v1
         with:
           just-version: 1.40.0
@@ -47,23 +60,31 @@ jobs:
       - name: Lint
         run: |
           ./chk.sh
-      - name: Setup TeX Live
+      - name: Setup TeX Live Minimal
         uses: teatimeguest/setup-texlive-action@v3
+        id: setup_texlive
         with:
-          packages: scheme-full
-      - name: Check `latex`
+          packages: > # Minimal set based on ent/tex analysis
+            scheme-basic
+            amsmath amsfonts amssymb graphicx geometry ifthen xcolor hyperref float booktabs
+            enumerate xspace xpatch mathtools stmaryrd csquotes standalone microtype tools collection-latexrecommended
+            fontspec newpxtext newpxmath utfsym newunicodechar collection-fontsrecommended
+            listings
+            tikz pgfplots tikz-cd tikz-3dplot tkz-euclide contour dot2texi
+            algpseudocodex pseudo tabto tabularx
+            amsthm thmtools mdframed tcolorbox ntheorem
+            imakeidx cleveref backref makeindex bibtex
+            physics worldflags todonotes
+            xelatex
+
+      - name: Check TeX Live Installation
         run: |
-          echo $GITHUB_PATH
+          echo "GITHUB_PATH is: $GITHUB_PATH"
           tlmgr --version
           which latex
-      - name: Cache WASM packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            lib/**/pkg
-          key: ${{ runner.os }}-wasm-${{ hashFiles('build.sh') }}
-          restore-keys: |
-            ${{ runner.os }}-wasm-
+          which xelatex
+          which bibtex
+          which makeindex
 
       - name: Cache HTML files
         uses: actions/cache@v4
@@ -81,34 +102,30 @@ jobs:
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: "5.3.0"
-          # dune-cache: true
-      # - name: Cache opam packages
+          # dune-cache: true # Consider enabling if build times are long and disk space allows
+      # - name: Cache opam packages # Opam cache can be large, might conflict with freeing space
       #   uses: actions/cache@v4
       #   with:
       #     path: ~/.opam
       #     key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
       #     restore-keys: |
       #       ${{ runner.os }}-opam-
+      - name: Install forester dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y libev-dev
       - name: Install forester
         run: |
-          sudo apt-get install libev-dev
           opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --yes
-          opam install forester --yes
+          opam install forester --yes --deps-only # Install dependencies first
+          opam install forester --yes # Then install forester itself
           # opam install forester.4.3.1 --yes
       # https://github.com/astral-sh/setup-uv
       - name: Setup Python via uv
         uses: astral-sh/setup-uv@v3
         with:
           version: "0.4.27"
-          # enable-cache: true
-      # - name: Install Homebrew
-      #   run: |
-      #     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-      #     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-      #     echo "$(brew --prefix)/bin" >> $GITHUB_PATH
-      # - name: Install saxon
-      #   run: |
-      #     brew install saxon
+          # enable-cache: true # UV cache might also consume space
+
       - name: Build with forester
         run: |
           eval $(opam env)
@@ -136,15 +153,10 @@ jobs:
 
   # Deploy job
   deploy:
-    # Add a dependency to the build job
     needs: build
-
-    # Deploy to the github-pages environment
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
