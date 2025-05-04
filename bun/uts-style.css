@@ -1,0 +1,790 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities;
+ */
+
+:root {
+    /* 16:9 */
+    --uts-canvas-width: 80%;
+    /* 80ex; */
+    --uts-canvas-height: 45ex;
+
+    --serif: Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua",
+        Georgia, serif;
+
+    /* from https://entropicthoughts.com/etc/style/css/main.css */
+    /* --serif: Whitman, serif; */
+    --sans: "CooperHewitt", Arial;
+    /* --mono: 'Hack', monospace; */
+
+    /* mine */
+    --mono: "Maple Mono", "Fira Code", "DejaVu Sans Mono", monospace;
+}
+
+:root[data-applied-font="serif"] body {
+    font-family: var(--serif);
+}
+
+:root[data-applied-font="mono"] body {
+    font-family: var(--mono);
+}
+
+:root[data-applied-font="sans"] body {
+    font-family: var(--sans);
+}
+
+@media screen {
+    body {
+        margin-top: 2em;
+        transition: ease all .2s;
+    }
+
+    #grid-wrapper {
+        display: grid;
+        margin-left: auto;
+        margin-right: auto;
+        grid-template-columns: unset;
+    }
+
+    #grid-wrapper article {
+        max-width: 100%;
+        margin-left: unset;
+        margin-right: unset;
+    }
+
+    #grid-wrapper nav#toc {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 160ex) {
+    body {
+        margin-top: 2em;
+        transition: ease all .2s;
+    }
+
+    #grid-wrapper {
+        display: grid;
+        grid-template-columns: 100ex;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 160ex;
+    }
+
+    #grid-wrapper article {
+        width: 100ex;
+    }
+
+    #grid-wrapper nav#toc {
+        display: unset;
+        max-width: 60ex;
+    }
+}
+
+/* for media width < 450px */
+@media only screen and (max-width: 450px) {
+    :root {
+        --uts-canvas-width: 53.33ex;
+        --uts-canvas-height: 30ex;
+    }
+
+    [data-taxon="Figure"] {
+        figure {
+            margin-left: 0;
+            margin-right: 0;
+            width: 60ex;
+
+            img {
+                min-height: var(--uts-canvas-height);
+            }
+        }
+    }
+}
+
+:root[data-applied-mode="light"] {
+    color-scheme: light;
+    --uts-text: black;
+    /* --uts-link: black; */
+    /* brown */
+    --uts-link: #9e7140;
+    /* orange */
+    /* --uts-link: #D96E34; */
+    /* dark grey */
+    /* --uts-link: #5d5d5d; */
+    --uts-link-internal: #5d5d5d;
+    --uts-text-gentle: rgb(132, 132, 132);
+    --uts-text-cite: #10731d;
+    --uts-background: white;
+    --uts-vocab: #75140c;
+    /* #f4ecd9; */
+}
+
+:root,
+:root[data-applied-mode="dark"] {
+    color-scheme: dark;
+    --uts-text: #cbd1db;
+    /* --uts-link: #cbd1db; */
+    /* light brown */
+    --uts-link: #d7b28b;
+    /* lighter orange */
+    /* --uts-link: #f5a25d; */
+    /* lighter grey than --uts-text */
+    /* --uts-link: #dddddd; */
+    --uts-link-internal: #adadad;
+    --uts-text-gentle: rgb(174, 174, 174);
+    --uts-text-cite: #8cd295;
+    --uts-background: #151a1f;
+    --uts-vocab: #db8c84;
+}
+
+:root {
+    background-color: var(--uts-background) !important;
+}
+
+.link.external a:after {
+    font-size: 50%;
+    vertical-align: super;
+    /* content: "\2197"; */
+    /* content: "\21A0"; */
+    /* content: "\2192"; */
+    /* content: "⧉"; */
+}
+
+nav#toc a.link.local,
+nav#toc .link.local a,
+nav#toc a.slug {
+    font-size: 80%;
+    box-shadow: none;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    color: rgb(132, 132, 132);
+    /* text-decoration-line: unset;
+    text-decoration-style: unset;
+    color: #10731d; */
+}
+
+/* article {
+    line-break: strict;
+    word-break: keep-all;
+} */
+
+body,
+span.taxon,
+nav#toc {
+    color: var(--uts-text) !important;
+}
+
+a,
+nav#toc a {
+    color: var(--uts-text) !important;
+    cursor: pointer;
+    /* text-decoration: underline; */
+    /* text-decoration: none !important; */
+}
+
+.link.external {
+    text-decoration: none;
+}
+
+.link.external a,
+.markdownit a {
+    color: var(--uts-link) !important;
+}
+
+.link.local a {
+    color: var(--uts-link-internal) !important;
+}
+
+.slug,
+.doi,
+.orcid,
+.meta-item .link.local a,
+nav#toc a.link.local,
+nav#toc .link.local a,
+nav#toc a.slug {
+    color: var(--uts-link-internal) !important;
+    font-weight: normal;
+    /* text-decoration-line: unset !important;
+    text-decoration-style: unset !important; */
+}
+
+/* This applies to references, including in title, main text, backmatter, but not in toc */
+.link-reference .link.local a,
+.link-reference-full .link.local a {
+    color: var(--uts-text-cite) !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+}
+
+.link-reference-full a .link-title {
+    color: var(--uts-text-gentle) !important;
+    margin-right: 0.5ex;
+    /* font-style: italic; */
+    /* font-weight: bold; */
+}
+
+.link-reference .link.external {
+    text-decoration: none !important;
+}
+
+/* So we fix meta items, and local links to normal notes (which looks like prefix-numeric) */
+/* .meta-item .link.local a, .link.local a[href*="-"], .link.local a[href*="macro"],
+.link.local a[href*="utensil"], .link.local a[href*="jonmsterling"] {
+    color: var(--uts-text) !important;
+    text-decoration-line: underline !important;
+    text-decoration-style: dotted !important;
+}
+
+a.slug[href*="-"], a.slug[href*="index"], a.slug[href*="macro"],
+a.slug[href*="utensil"], a.slug[href*="jonmsterling"] {
+    color: var(--uts-text-gentle) !important;
+    text-decoration-line: underline !important;
+    text-decoration-style: dotted !important;
+} */
+
+button#theme-toggle,
+button#font-toggle {
+    /* font-size: 26px; */
+    margin: auto 4px;
+    cursor: pointer;
+    /* adding: 0; */
+    font: inherit;
+    background: 0 0;
+    border: 0;
+}
+
+button#search {
+    /* font-size: 26px; */
+    margin: auto 4px;
+    cursor: pointer;
+    /* adding: 0; */
+    font: inherit;
+    background: 0 0;
+    border: 0;
+}
+
+:root svg#sun,
+:root[data-applied-mode="dark"] svg#moon {
+    display: none;
+}
+
+:root[data-applied-mode="dark"] svg#sun {
+    display: block;
+    color: var(--uts-text);
+}
+
+svg.embedded-tex-svg,
+img[src^="data:image/svg+xml"] {
+    max-width: 97%;
+}
+
+[data-taxon="Remark"] {
+    --taxon-color: #97da9b;
+    /* #239f5c; */
+}
+
+[data-taxon="Example"] {
+    --taxon-color: #e28563;
+    /* #d7511f #cd7e62 #9e3c17 #8C2700 */
+}
+
+[data-taxon="Theorem"],
+[data-taxon="Lemma"],
+[data-taxon="Corollary"],
+[data-taxon="Proof"] {
+    --taxon-color: #95dbfc;
+    /* #006994; */
+}
+
+[data-taxon="Notation"] {
+    --taxon-color: #ffd27f;
+}
+
+[data-taxon="Convention"] {
+    --taxon-color: #d369cb;
+}
+
+section.block {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+section[data-taxon] {
+    margin: 1em 0 1em 0;
+    padding: 1em 1em 1em 1em;
+    border-left: 5px solid var(--taxon-color);
+    background-color: color-mix(
+        in srgb,
+        var(--taxon-color) 6%,
+        var(--uts-background) 94%
+    );
+}
+
+section[data-taxon]:hover {
+    background-color: color-mix(
+        in srgb,
+        var(--taxon-color) 12%,
+        var(--uts-background) 88%
+    );
+}
+
+section[data-taxon] h1 span.taxon,
+#toc span.taxon[data-taxon] {
+    color: color-mix(in srgb, var(--taxon-color) 60%, var(--uts-text) 40%) !important;
+}
+
+section[data-taxon="Example"],
+section[data-taxon="Notation"],
+section[data-taxon="Convention"] {
+    border: 1px solid var(--taxon-color);
+    border-radius: 5px;
+}
+
+section[data-taxon="Proof"].block {
+    border-left: unset;
+    background-color: unset;
+}
+
+section[data-taxon="Figure"] {
+    --taxon-color: var(--uts-text);
+    border-left: unset;
+    background-color: unset;
+}
+
+section[data-taxon="Algorithm"] {
+    --taxon-color: var(--uts-text);
+    border-left: unset;
+    background-color: unset;
+    border-radius: unset;
+    border-top: 3px solid var(--taxon-color);
+    border-bottom: 1px solid var(--taxon-color);
+    margin-left: 1em;
+    margin-right: 1em;
+    padding: 0px 0px 0px 0px;
+
+    summary {
+        border-bottom: 1px solid var(--taxon-color);
+        padding-top: 3ex;
+        padding-bottom: 3ex;
+
+        /* h1 {
+            padding-left: 1em;
+            padding-right: 1em;
+        } */
+    }
+
+    figure {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+}
+
+section[data-taxon="Figure"].block:hover,
+section[data-taxon="Proof"].block:hover,
+section[data-taxon="Algorithm"].block:hover {
+    background-color: rgba(0, 100, 255, 0.04);
+}
+
+/* test with http://127.0.0.1:1314/tt-001Q.xml for References/Context/Backlinks/Related and Remark/Convention/Definition  */
+.link-list section[data-taxon],
+section[data-taxon="Proof"],
+section[data-taxon="Definition"],
+section[data-taxon="Reference"] {
+    margin-top: 5px;
+    margin-bottom: 2px;
+    padding-top: 5px;
+    padding-bottom: 2px;
+    /* background-color: unset; */
+}
+
+section[data-taxon]:hover section[data-taxon="Proof"],
+section[data-taxon="Proof"]:hover,
+section[data-taxon="Definition"]:hover,
+section[data-taxon="Reference"]:hover {
+    background-color: rgba(0, 100, 255, 0.04);
+}
+
+span.newvocab {
+    color: blue;
+    font-weight: bold;
+}
+
+span.vocab {
+    font-weight: bold;
+}
+
+span.vocab .link.local a {
+    /* text-decoration-style: solid; */
+    text-decoration-color: color-mix(
+        in srgb,
+        var(--uts-vocab) 40%,
+        var(--uts-background) 60%
+    );
+    color: var(--uts-vocab) !important;
+}
+
+#toc a.bullet {
+    display: none;
+}
+
+/* #toc > .block > ul > li > a.bullet {
+    color: transparent !important;
+    border-left: 5px solid color-mix(in srgb, rgb(0, 106, 255) 40%, var(--uts-text) 60%);
+    border-radius: 5px 0px 0px 5px;
+} */
+
+#toc > .block > ul > li > span.link.local {
+    font-weight: bold;
+    /* border-bottom: 1px solid var(--uts-text-gentle); */
+}
+
+#toc > .block > ul > li > ul.block {
+    margin-top: 0.5em;
+}
+
+/* https://blog.logrocket.com/implementing-scroll-aware-ui-state-css/ */
+
+/* article {
+    scroll-timeline: --article-scroll inline;
+} */
+
+/* @keyframes toc_animation {
+    from {
+        top: var(--offset);
+    }
+    to {
+        top: calc( var(--offset) - 0.5 * var(--eh));
+    }
+} */
+
+/* https://css-tricks.com/a-dynamically-sized-sticky-sidebar-with-html-and-css/ */
+
+nav#toc {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+nav#toc > .block {
+    --offset: 1em;
+    --eh: 100%;
+    --vh: 100vh;
+    --ratio: calc(var(--vh) / var(--eh));
+    flex-grow: 1;
+    flex-basis: 300px;
+    align-self: start;
+    position: sticky;
+    top: var(--offset);
+    /* animation: auto toc_animation linear forwards;
+    animation-timeline: scroll(); */
+}
+
+nav#toc > .block > ul.block {
+    max-height: calc(80vh - var(--offset) * 2);
+    overflow-y: auto;
+}
+
+nav#toc li {
+    border-left: transparent 5px solid;
+    padding-left: 0.5em;
+}
+
+nav#toc li.active {
+    font-weight: bold;
+    border-left: var(--uts-text) 5px solid;
+    /* color: color-mix(in srgb, var(--uts-text) 30%, blue 70%); */
+    /* background-color: rgba(0, 100, 255, .1); */
+}
+
+/* a.slug {
+    word-break: keep-all;
+} */
+
+.meta-lean {
+    display: block;
+    float: right;
+    height: 4em;
+    width: 4vw;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+}
+
+/* clearfix hack */
+/* header h1::after {
+    content: "";
+    clear: both;
+    display: table;
+} */
+
+.link-buttons {
+    cursor: pointer;
+}
+
+.link-button,
+.meta-lean a,
+.meta-lean-symbol {
+    font-weight: normal;
+    font-size: 60%;
+    border-radius: 5px;
+    color: var(--uts-text-gentle) !important;
+    background-color: var(--uts-background) !important;
+    border: var(--uts-text-gentle) 1px solid;
+    padding: 3px 1ex 3px 1ex;
+    margin: 0 0.5ex 1ex 0.5ex;
+    float: right;
+}
+
+.link-button:hover,
+.meta-lean a:hover,
+.meta-lean-symbol:hover {
+    box-shadow: #95dbfc 0 0 5px;
+}
+
+.link-source span,
+.link-pdf span {
+    display: none;
+    margin-left: 1ex;
+}
+
+/* .link-source:hover span,
+.link-pdf:hover span {
+    display: inline;
+} */
+
+.meta-lean a,
+.meta-lean-symbol,
+.link-source span,
+.link-pdf span {
+    font-family: var(--mono);
+}
+
+/* details:hover > summary .meta-lean a {
+    display: inline;
+} */
+
+.meta-lean-symbol {
+    /* margin: 1ex 0.5ex 1ex 0.5ex; */
+    /* cursor: pointer; */
+    /* visibility: hidden; */
+    /* text-align: right; */
+    /* font-weight: normal;
+    font-family: var(--mono); */
+}
+
+.meta-lean-list {
+    display: none;
+    visibility: hidden;
+}
+
+.meta-lean:hover .meta-lean-list {
+    display: block;
+    visibility: visible;
+}
+
+.meta-lean-list:hover {
+    display: block;
+    visibility: visible;
+}
+
+.meta-lean:hover .meta-lean-symbol {
+    visibility: hidden;
+}
+
+.related {
+    display: none;
+}
+
+.todo {
+    display: block;
+    background-color: rgba(255, 255, 0, 0.1);
+    /* light sepia */
+    border: 1px solid rgb(129, 129, 24);
+    /* dark sepia */
+    border-radius: 5px;
+    padding: 1em;
+    margin: 1em 0;
+}
+
+.todo::before {
+    content: "TODO: ";
+    font-weight: bold;
+}
+
+.langblock {
+    display: none;
+}
+
+.langblock-body {
+    font-style: italic;
+    font-size: 90%;
+    font-weight: normal;
+    color: var(--uts-text-gentle);
+}
+
+.langblock-body em {
+    font-style: normal;
+}
+
+.show-langblock .langblock {
+    margin-left: 1em;
+    display: block;
+}
+
+.show-langblock h1 .langblock {
+    margin-left: 0em;
+    display: inline;
+}
+
+button#langblock-toggle {
+    /* font-size: 26px; */
+    margin: auto 4px;
+    cursor: pointer;
+    font: inherit;
+    background: 0 0;
+    border: 0;
+}
+
+@keyframes breathing {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+
+/* .embeded-shadertoy {
+
+} */
+
+
+/* https://html-online.com/articles/image-align-center/ */
+figure {
+    display: block;
+    text-align: center;
+}
+
+/*
+    Overrides extra styling in style.css
+*/
+code.highlight,
+code.highlight code {
+    background-color: unset;
+    padding: unset;
+    font-size: unset;
+}
+
+/* code.highlight {
+    margin-top: 5em;
+    margin-bottom: 5em;
+} */
+
+.markdownit.grace-loading,
+code.highlight.grace-loading {
+    color: var(--uts-text);
+    white-space: pre-wrap;
+    background: unset;
+    animation: unset;
+    height: unset;
+}
+
+.penrose-root.loading,
+
+
+.optional {
+    color: var(--uts-text-gentle);
+}
+
+[data-taxon] ol {
+    counter-reset: ol;
+    list-style-type: none;
+
+    > li {
+        counter-increment: ol;
+
+        > ol {
+            counter-reset: ol2;
+            list-style-type: none;
+
+            > li {
+                counter-increment: ol2;
+            }
+
+            > li::before {
+                content: counter(ol2, lower-roman) ") ";
+            }
+        }
+    }
+
+    > li::before {
+        content: counter(ol, numeric) ") ";
+    }
+}
+
+.usegpu,
+
+:root[data-applied-mode="dark"] {
+    svg.embedded-tex-svg,
+    img.embedded-tex-svg {
+        filter: invert(0.85);
+    }
+
+    img[src^="data:image/svg+xml"] {
+        filter: invert(0.85);
+    }
+
+    span.newvocab {
+        filter: invert(100%) !important;
+        /* filter: brightness(800%) !important; */
+    }
+
+    #langblock-toggle svg {
+        filter: invert(0.85);
+    }
+
+    .lazy-loading,
+    .loading,
+    .grace-loading {
+        filter: invert(0.85);
+    }
+
+    .markdownit.grace-loading,
+    code.highlight.grace-loading {
+        filter: unset;
+    }
+
+    .penrose-root svg {
+        filter: invert(1.0);
+        /* drop-shadow(0 0 5px #ffffff); */
+    }
+}
+
+/* the first h1 in the first section */
+article > section:first-of-type > details > summary > header > h1 {
+    font-size: 2em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-bottom: 0.5em;
+}
+
+/* Inspired by https://matklad.github.io/2025/04/22/horizontal-scroll.html */
+
+p {
+    hyphens: auto;
+}
+
+a {
+    word-break: break-all;
+}

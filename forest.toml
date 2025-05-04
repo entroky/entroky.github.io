@@ -1,0 +1,7 @@
+[forest]
+trees = ["trees"]
+assets = ["assets"]
+prefixes = ["mfk"]
+theme = "theme"
+root = "index"
+stylesheet = "uts-forest.xsl"

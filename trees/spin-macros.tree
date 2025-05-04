@@ -1,0 +1,53 @@
+\export{macros}
+\tag{macro}
+% clifford hopf spin
+% \tag{}
+
+% definition theorem lemma construction observation
+% convention corollary axiom example exercise proof
+% discussion remark
+% \taxon{}
+
+\def\Cl{\mathcal{C}\kern-2pt\ell}
+
+\def\Pin{\operatorname{Pin}}
+
+\def\Spin{\operatorname{Spin}}
+
+\def\unitary[x]{\operatorname{U}(\x)}
+
+\def\star[x]{\x^{*}}
+
+\def\norm[x]{\operatorname{N}(\x)}
+
+\def\conj[x]{\bar{\x}}
+
+% \def\Cl{\mathop{\mathcal{C}\ell}}
+\def\Ga{\mathop{\mathcal{G}}}
+
+\def\lmap[x]{\to_{l[\x]}}
+\def\rmap{\to_{+*}}
+\def\amap{\to_{a}}
+\def\lfun{\iota}
+\def\rfun{\mathit{1}} %{\iota_{0}}
+\def\afun{\iota_{a}}
+
+\def\href[url][t]{[\t](\url)}
+\def\Mathlib{#{\textsf{Mathlib}}}
+\def\MathlibDoc[x]{[\x](https://leanprover-community.github.io/mathlib4_docs/find/#docs/\x)}
+
+\def\bu{\bullet}
+\def\ii{\item}
+\def\placeholder[x]{#{\texttt{\x}}}
+\def\optional[x]{\<html:span>[class]{optional}{\x}}
+
+\def\pre{\mathtt{pre}}
+
+\def\label[x]{}
+\def\leanok{}
+% https://leanprover-community.github.io/mathlib4_docs/find/#doc/
+\def\lean[x]{\meta{lean}{\x}}
+\def\uses[x]{}
+
+\def\cite[x]{\citek{\x}}
+\def\linebreak{}

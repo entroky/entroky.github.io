@@ -1,0 +1,597 @@
+\title{basic macros}
+\tag{macro}
+
+\import{latex-preamble}
+
+\xmlns:html{http://www.w3.org/1999/xhtml}
+\xmlns:fr{http://www.jonmsterling.com/jms-005P.xml}
+
+\strong{Useful macros from [[jonmsterling]]'s [macros](https://git.sr.ht/~jonsterling/public-trees/tree/main/item/base-macros.tree)}
+
+\p{\code{citek[refid]}: Refer to a reference entry with only its id, and surrouding brackets.}
+
+\def\citek[refid]{\let\escape[x]{\x}\<html:span>[class]{link-reference}{[\escape{[\refid]}](\refid)}}
+
+\p{\code{citef[refid]}: Refer to a reference entry with the full title, and the id like \code{citek}.}
+
+\def\citef[refid]{\let\escape[x]{\x}\<html:span>[class]{link-reference-full}{[\escape{[\refid]}](\refid)}}
+
+\p{\code{mark[body]}: Some yellow background mark text.}
+
+\def\mark[body]{\<html:mark>{\body}}
+
+\alloc\base/tex-preamble
+\alloc\base/extra-preamble
+
+\p{\code{texfig[body]}: A figure rendered by LaTeX.}
+
+\def\texfig[body]{%
+ \scope{%
+  \put?\base/tex-preamble{%
+   \latex-preamble/diagrams%
+   \latex-preamble/string-diagrams%
+  }%
+  \put?\base/extra-preamble{}%
+  \tex{\get\base/tex-preamble\get\base/extra-preamble}{\body}%
+ }
+}
+
+\p{\code{texalg[body]}: An algorithm rendered by LaTeX.}
+
+\def\texalg[body]{%
+ \scope{%
+  \put?\base/tex-preamble{%
+  %  \latex-preamble/diagrams%
+  %  \latex-preamble/string-diagrams%
+    \latex-preamble/algorithms
+  }%
+  \put?\base/extra-preamble{}%
+  \tex{\get\base/tex-preamble\get\base/extra-preamble}{\body}%
+ }
+}
+
+\def\minialg[body]{
+ \texalg{
+    \begin{minipage}{0.97\linewidth}
+    \vspace{2ex}
+    % \setlength{\parskip}{3ex plus 0.5ex minus 0.2ex}
+    \body
+    \end{minipage}
+  }
+}
+
+\p{\code{proof[body]}: A proof block that's NOT part of the TOC.}
+
+\def\proof[body]{
+ \scope{
+   \put\transclude/toc{false}
+   %  \put\transclude/expanded{false}
+   \subtree{
+     \taxon{proof}
+     \body
+   }
+ }
+}
+
+\p{\code{table[body]}: A table.}
+
+\def\table[body]{
+  \<html:table>{\body}
+}
+
+\p{\code{thead[body]}: A table header.}
+
+\def\thead[body]{
+  \<html:thead>{\body}
+}
+
+\p{\code{tbody[body]}: A table body.}
+
+\def\tbody[body]{
+  \<html:tbody>{\body}
+}
+
+\p{\code{tr[body]}: A table row.}
+
+\def\tr[body]{
+  \<html:tr>{\body}
+}
+
+\p{\code{td[body]}: A table cell.}
+
+\def\td[body]{
+  \<html:td>{\body}
+}
+
+\p{\code{th[body]}: A table header.}
+
+\def\th[body]{
+  \<html:th>{\body}
+}
+
+\p{\code{hr}: A horizontal rule.}
+
+\def\hr{
+  \<html:hr>{}
+}
+
+\strong{Useful macros based on [[jonmsterling]]'s [Public bibliographies](https://www.jonmsterling.com/jms-005X/)}
+
+\p{\code{make-topic-bibliography[topic]}: A bibliography of papers, presentations, and people related to a topic.}
+
+\def\make-topic-bibliography[topic]{
+  \subtree{
+   \title{accepted papers}
+   \query{
+    \open\query
+    \isect{\tag{\topic}}{\taxon{reference}}{\tag{accepted}}
+   }
+  }
+
+  \subtree{
+   \title{refereed papers}
+   \query{
+    \open\query
+    \isect{\tag{\topic}}{\taxon{reference}}{\tag{refereed}}
+   }
+  }
+
+  \subtree{
+   \title{manuscripts}
+   \query{
+    \open\query
+    \isect{\tag{\topic}}{\taxon{reference}}{\tag{preprint}}{\compl{\tag{accepted}}}
+   }
+  }
+
+  \subtree{
+   \title{dissertations}
+   \query{
+    \open\query
+    \isect{\tag{\topic}}{\taxon{reference}}{\tag{dissertation}}
+   }
+  }
+
+  \subtree{
+   \title{technical reports}
+   \query{
+    \open\query
+    \isect{\tag{\topic}}{\taxon{reference}}{\tag{techreport}}
+   }
+  }
+
+  \subtree{
+   \title{presentations}
+   \query{
+    \open\query
+    \isect{\tag{\topic}}{
+     \union{
+      \isect{\tag{workshop}}{\taxon{reference}}
+     }{\taxon{presentation}}
+    }
+   }
+  }
+
+
+  \subtree{
+   \title{seminar talks}
+   \query{
+    \open\query
+    \isect{\tag{\topic}}{\taxon{reference}}{\tag{seminar}}
+   }
+  }
+
+  \subtree{
+   \title{roladex}
+   \query{
+    \open\query
+    \isect{\taxon{person}}{\tag{\topic}}
+   }
+  }
+}
+
+\strong{Useful macros from [CAIMEOX's macros](https://github.com/CAIMEOX/caimeox.github.io/blob/main/trees/macros.tree)}
+
+\p{\code{block[tit][body]}: A block that is part of the TOC.}
+
+\def\block[tit][body]{%
+    \subtree{%
+      \title{\tit}
+      \body
+    }
+}
+
+\p{\code{section[tit][body]}: A section that is NOT part of the TOC.}
+
+\def\section[tit][body]{
+  \scope{
+    \put\transclude/toc{false}
+    \subtree{
+      \tit
+      \body
+    }
+  }
+}
+
+\strong{Useful macros we defined}
+
+\p{\code{citet[tid][refid]}: Refer to a definition/theorem/page \code{tid} in a reference entry \code{refid} with brackets.}
+
+\def\citet[tid][refid]{\let\escape[x]{\x}\<html:span>[class]{link-reference}[tid]{\tid}[refid]{\refid}{[\escape{[\refid, \tid]}](\refid)}}
+
+\p{\code{tikzfig[a]}: A TikZ graph rendered via LaTeX.}
+
+\def\tikzfig[a]{\texfig{\startverb\begin{minipage}{1.1\linewidth}
+        \begin{figure}[H]\centering\stopverb\a\startverb\end{figure}
+        \end{minipage}\stopverb}}
+
+\p{\code{tikzfig[a]}: A TikZ graph rendered via LaTeX, adjusted the width to be half, so it could be used in a table and such.}
+
+\def\tikzfig2[a]{\texfig{\startverb\begin{minipage}{0.5\linewidth}
+        \begin{figure}[H]\centering\stopverb\a\startverb\end{figure}
+        \end{minipage}\stopverb}}
+
+\def\tikzfigs[scale][a]{\texfig{\startverb\begin{minipage}{\stopverb\scale\startverb\linewidth}
+        \begin{figure}[H]\centering\stopverb\a\startverb\end{figure}
+        \end{minipage}\stopverb}}
+
+\p{\code{minitex[body]}: Typesetting LaTeX code in a minipage, with the width of an A5 paper,
+so the text size almost matches the size output by native forester code. This doesn't work very well on mobile yet.}
+
+\alloc\base/tex-preamble
+
+\def\minitex[body]{
+ \scope{
+  \put?\base/tex-preamble{
+   \latex-preamble/minipage
+  }
+  \tex{\get\base/tex-preamble}{
+    \begin{minipage}{0.97\linewidth}
+    \vspace{4ex}
+    \setlength{\parskip}{3ex plus 0.5ex minus 0.2ex}
+    \body
+    \end{minipage}
+  }
+ }
+}
+
+\p{\code{note[name][body]}: A note.}
+
+\def\note[name][body]{
+    \title{\name}
+    \body
+}
+
+\p{\code{refnote[name][reference][body]}: A note with a reference.}
+
+\def\refnote[name][reference][body]{
+  \note{\name \citek{\reference}}{\body}
+}
+
+\p{\code{refnotet[name][tid][reference][body]}: A note with a reference.}
+
+\def\refnotet[name][tid][reference][body]{%
+  \title{\name \citet{\tid}{\reference}}
+  \body
+}
+
+\p{\code{texnote[name][reference][body]}: A \code{minitex} note with a reference.}
+
+\def\texnote[name][reference][body]{
+  \refnote{\name}{\reference}{\minitex{\body}}
+}
+
+\p{\code{card[taxa][name][body]}: A card.}
+
+\def\card[taxa][name][body]{\taxon{\taxa}\note{\name}{\body}}
+
+\p{\code{refcard[taxa][name][reference][body]}: A card with a reference.}
+
+\def\refcard[taxa][name][reference][body]{\taxon{\taxa}\refnote{\name}{\reference}{\body}}
+
+\p{\code{cardt[taxa][name][tid][body]}: A card with a reference to a definition/theorem/page.}
+
+\def\refcardt[taxa][name][tid][reference][body]{\taxon{\taxa}\refnotet{\name}{\tid}{\reference}{\body}}
+
+\p{\code{texcard[taxa][name][reference][body]}: A \code{minitex} card with a reference.}
+
+\def\texcard[taxa][name][reference][body]{\refcard{\taxa}{\name}{\reference}{\minitex{\body}}}
+
+\p{\code{refdef[name][reference][body]}: A definition with a reference.}
+
+\def\refdef[name][reference][body]{\refcard{definition}{\name}{\reference}{\body}}
+
+\p{\code{refdeft[name][tid][reference][body]}: A definition with a reference to a definition/theorem/page.}
+
+\def\refdeft[name][tid][reference][body]{\refcardt{definition}{\name}{\tid}{\reference}{\body}}
+
+\p{\code{texdef[name][reference][body]}: A \code{minitex} definition with a reference.}
+
+\def\texdef[name][reference][body]{\texcard{definition}{\name}{\reference}{\body}}
+
+\p{\code{wikiref[name][citeid][pageid][year]}: A reference to a Wikipedia article.}
+
+\def\wikiref[name][citeid][pageid][year]{
+  \title{\name - Wikipedia}
+  \meta{external}{https://en.wikipedia.org/wiki/\pageid}
+  \taxon{reference}
+  \meta{bibtex}{\startverb
+@misc{wiki\stopverb\year\citeid\startverb,
+  title  = {\stopverb\name - Wikipedia\startverb},
+  author = {Wikipedia},
+  year   = {\stopverb\year\startverb},
+  url    = {\stopverbhttps://en.wikipedia.org/wiki/\pageid\startverb}
+}
+  \stopverb}
+}
+
+\p{\code{citewiki[shortname][wikiid]}: A citation-style link to a Wikipedia article, it's a lightweight alternative to \code{wikiref}.}
+
+\def\citewiki[shortname][wikiid]{
+  \let\escape[x]{\x}\<html:span>[class]{link-reference}{[\escape{[wiki-\shortname]}](https://en.wikipedia.org/wiki/\wikiid)}
+}
+
+\p{\code{nlabref[name][citeid][pageid][year]}: A reference to a nLab article.}
+
+\def\nlabref[name][citeid][pageid][year]{
+  \title{\name - nLab}
+  \meta{external}{https://ncatlab.org/nlab/show/\pageid}
+  \taxon{reference}
+  \meta{bibtex}{\startverb
+@misc{nlab\stopverb\year\citeid\startverb,
+  title  = {\stopverb\name - nLab\startverb},
+  author = {nLab},
+  year   = {\stopverb\year\startverb},
+  url    = {\stopverbhttps://ncatlab.org/nlab/show/\pageid\startverb}
+}
+  \stopverb}
+}
+
+\p{\code{prref[citeid][user][repo][prid][prauthor][pryear]}: A reference to a Github Pull Request.}
+
+\def\prref[citeid][user][repo][prid][prauthor][pryear]{
+  \def\prname{\repo PR \prid}
+  \def\prspec{\user\startverb
+/
+\stopverb\repo\startverb
+/pull/
+\stopverb\prid}
+  \def\prurl{https://github.com/\prspec}
+  \def\prtitle{\prname}
+  \title{\prtitle}
+  \meta{external}{\prurl}
+  \taxon{reference}
+  \meta{bibtex}{\startverb
+@misc{pr-\stopverb\citeid\startverb,
+  title  = {\stopverb\prtitle\startverb},
+  author = {\stopverb\prauthor\startverb},
+  year   = {\stopverb\pryear\startverb},
+  url    = {\stopverb\prurl\startverb}
+}
+  \stopverb}
+}
+
+\p{\code{edit[treeid]}: A link to the source code of a tree.}
+
+\def\edit[treeid]{
+  \let\escape[x]{\x}
+  [\escape{Edit}](https://github.com/utensil/forest/blob/main/trees/\treeid.tree)
+}
+
+\p{\code{link[url]}: Linking to a URL without an explicit title.}
+
+\def\link[url]{[⧉](\url)}
+
+\p{\code{citelink[url]}: Linking to a URL without an explicit title, in a citation style (i.e. with brackets).}
+
+\def\citelink[url]{\let\escape[x]{\x}[\escape{[⧉]}](\url)}
+
+\p{\code{quote[body]}: A blockquote.}
+
+\def\quote[body]{
+  \<html:blockquote>{\body}
+}
+
+\p{\code{fold[treeid]}: Making [transcludes](https://www.forester-notes.org/jms-007L/) collapse. (Not working yet)}
+
+\def\fold[body]{
+  \scope{
+    \put?\transclude/expanded{false}
+    \put?\transclude/toc{false}
+
+    \body
+  }
+}
+
+\p{\code{collapsed[t][body]}: A block that is collapsed by default and NOT part of the TOC.}
+
+\def\collapsed[t][body]{
+ \scope{
+    \put\transclude/toc{false}
+    \put\transclude/expanded{false}
+    \subtree{
+      \title{\t}
+      \body
+   }
+ }
+}
+
+\p{\code{codeblock[lang][body]}: A syntax-highlighted code block specifying the language.}
+
+\def\codeblock[lang][body]{
+  \<html:code>[class]{\lang highlight grace-loading}{\body}
+}
+
+\p{\code{newvocab[x]}: A newly defined term with an emphazised style.}
+
+\def\newvocab[x]{\<html:span>[class]{newvocab}{\x}}
+% htmlClass doesn't work because trust is not set to true
+% see https://github.com/KaTeX/KaTeX/blob/main/docs/options.md
+% \def\newvocab[x]{#{\htmlData{type=newvocab}{\textbf{\x}}}}
+
+\p{\code{vocab[x]}: A previously defined term with a less emphazised style.}
+
+\def\vocab[x]{\<html:span>[class]{vocab}{\x}}
+
+\p{\code{vocabk[x][addr]}: A previously defined term with a less emphazised style and a link to the defining note.}
+
+\def\vocabk[x][addr]{\<html:span>[class]{vocab}{[\x](\addr)}}
+
+\p{\code{related[x]}: A hidden text, useful particular for referencing other notes so they can show up in related notes, but not shown.}
+
+\def\related[x]{\<html:span>[class]{related}{\x}}
+
+\p{\code{todo[x]}: A TODO item.}
+
+\def\todo[x]{\<html:span>[class]{todo}{\x}}
+
+\p{\code{todolist}: A list of TODO items, no effect on web, only for PDF.}
+
+\def\todolist{\<html:span>[class]{todolist}{}}
+
+\p{\code{webonly[body]}: Content that is only shown on the web, e.g. with interactive elements.}
+
+\def\webonly[body]{\<html:span>[class]{webonly}{\body}}
+
+\p{\code{langblock[symbol][body]}: A block with a language symbol.}
+
+\def\langblock[symbol][body]{%
+  \<html:span>[class]{langblock}{\<html:span>[class]{langblock-symbol}{\symbol} \<html:span>[class]{langblock-body}{\body}}
+}
+
+\alloc\translation/src
+\alloc\translation/dst
+
+\p{\code{translation/tp[dst-content][src-content]}: A translation paragraph.}
+
+\def\translation/tp[dst-content][src-content]{%
+  \put?\translation/src{🇫🇷}
+  \put?\translation/dst{🇺🇸}
+  \let\src{\get\translation/src}
+  \let\dst{\get\translation/dst}
+  \p{%
+    \dst-content
+    \put\transclude/expanded{false}
+    \langblock{\src}{\src-content}
+  }
+}
+
+\p{\code{translation/tsec[dst-content][src-content][body]}: A translation section.}
+
+\def\translation/tsec[dst-content][src-content][body]{%
+  \put?\translation/src{🇫🇷}
+  \put?\translation/dst{🇺🇸}
+  \let\src{\get\translation/src}
+  \let\dst{\get\translation/dst}
+  \block{\dst-content \langblock{\src}{\src-content}}{\body}
+}
+
+\p{\code{translation/ttitle[dst-content][src-content]}: A translation title.}
+
+\def\translation/ttitle[dst-content][src-content]{%
+  \put?\translation/src{🇫🇷}
+  \put?\translation/dst{🇺🇸}
+  \let\src{\get\translation/src}
+  \let\dst{\get\translation/dst}
+  \title{\dst-content \langblock{\src}{\src-content}}
+}
+
+\p{\code{eqtag[eqno][equation]}: A tagged equation.}
+
+\def\eqtag[eqno][equation]{
+  ##{\equation \verb*|\tag{*\eqno\verb*|}*}
+}
+
+\p{\code{eqnotag[equation]}: An equation without a tag.}
+
+\def\eqnotag[equation]{
+  ##{\equation \verb*|\notag*}
+}
+
+\p{\code{embed[src]}: Embedding an external HTML file, adapted from [here](https://lists.sr.ht/~jonsterling/forester-discuss/\%3CouGgO2PnjJxebrCO-YzNYlSBYnEF9DiupMdWtSP7Q-jVApwBuqrz5AbukPL58LBLpzFVR-C26ULjwbl5sDa9TxzTEDciNZ4Uaux0AfQJ40c=@dannypsnl.me\%3E). }
+
+\def\embed[src]{
+  \<html:embed>[type]{text/html}[src]{\src}{}
+}
+
+\p{\code{shader[extraclasses][body]}: Embedding a GLSL shader code.}
+
+\def\shader[extraclasses][body]{
+  \<html:div>[class]{embeded-shader \extraclasses}{\body}
+}
+
+\def\shadertoy[extraclasses][body]{
+  \<html:div>[class]{embeded-shadertoy \extraclasses}{\body}
+}
+
+\def\shadertoywithcode[caption][body]{
+  \<html:div>[class]{shadertoywithcode}{
+    \figure{\shadertoy{ }{\body}\figcaption{\caption}}
+    \<html:details>{\<html:summary>{Code} \codeblock{glsl}{\body}}
+  }
+}
+
+\def\md[body]{\<html:div>[class]{markdownit grace-loading}{\body}}
+
+\def\mdblock[t][body]{\block{\t}{\md{\body}}}
+
+\def\mdnote[t][body]{\note{\t}{\md{\body}}}
+
+\def\loadjs[src]{
+  \<html:script>[type]{module}[src]{\src}{}
+}
+
+\def\js[body]{
+  \<html:script>[type]{text/javascript}{\body}
+}
+
+\def\css[body]{
+  \<html:style>{\body}
+}
+
+\def\component[componentClass][cssbody][jsbody][body]{
+  \<html:div>[class]{\componentClass}{\css{\cssbody} \js{\jsbody} \body}
+}
+
+\def\penrose-inline[domain][substance][style]{
+  \<html:div>[class]{penrose-root loading}{
+    \<html:div>[class]{penrose-domain}{\domain}
+    \<html:div>[class]{penrose-substance}{\substance}
+    \<html:div>[class]{penrose-style}{\style}
+  }
+}
+
+\def\penrose[trio]{
+  \<html:div>[class]{penrose-root loading}[data-trio]{\trio}{}
+}
+
+\def\typst-inline[body]{
+  \<html:div>[class]{typst-root loading}{\body}
+}
+
+\def\typst[src]{
+  \<html:div>[class]{typst-root loading}[data-src]{\src}{}
+}
+
+\def\pikchr-inline[body]{
+  \<html:div>[class]{pikchr-root loading}{\body}
+}
+
+\def\graphviz[layout][body]{
+  \<html:div>[class]{graphviz-root loading}[data-layout]{\layout}{\body}
+}
+
+\def\d3-graphviz[layout][body]{
+  \<html:div>[class]{d3-graphviz-root loading}[data-layout]{\layout}{\body}
+}
+
+% \def\cref[addr]{\<html:span>[class]{cref}{[\addr](\addr)}} % this is not required as XSLT can handle local links with or without taxons like cleveref automatically
+
+% Some Math symbols that are common in all topics
+
+\def\CC{\mathbb C}
+\def\FF{\mathbb F}
+\def\NN{\mathbb N}
+\def\QQ{\mathbb Q}
+\def\RR{\mathbb R}
+\def\ZZ{\mathbb Z}

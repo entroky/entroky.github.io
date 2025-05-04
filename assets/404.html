@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            text-align: center;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #error-content {
+            display: none;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            max-width: 600px;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #343a40;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ghost {
+            margin: 20px auto;
+        }
+
+        .ghost-body {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+    <script type="text/javascript">
+        const REDIRECT_TIMEOUT = 3000; // Show error after 3 seconds
+        const redirectConfig = [
+            // {regex: /^\/example$/, redirect: "/example.html"},
+            {regex: /\/.*\/$/, redirect: (path) => path.replace(/\/$/, '.xml')},
+            {regex: /\/.*\.html$/, redirect: (path) => path.replace(/\.html$/, '.xml')},
+            {regex: /.*/, redirect: "/index.xml"}
+        ];
+
+        async function redirectToPage() {
+            const isLocalFile = window.location.protocol === 'file:';
+            if (isLocalFile) {
+                console.debug('Running in local file system mode - redirects will be simulated');
+            }
+
+            // Check query param first, then referrer, then default
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromPath = urlParams.get('from');
+            const referrer = document.referrer || window.location.href;
+            let path = fromPath || (referrer && !referrer.includes('404.html') ? new URL(referrer).pathname : '/forest/');
+            console.log('source path:', path);
+            const pathParts = path.split('/');
+            path = pathParts.length > 2 ? '/' + pathParts.slice(2).join('/') : path;
+
+            // Get redirect chain from URL parameters
+            const redirectChain = urlParams.getAll('r') || [];
+            const MAX_REDIRECTS = 5; // Maximum redirects in a single chain
+
+            for (let rule of redirectConfig) {
+                if (rule.regex.test(path)) {
+                    const redirectTo = typeof rule.redirect === 'function' ? rule.redirect(path) : rule.redirect;
+                    const redirectPair = `${path}>${redirectTo}`;
+                    
+                    // Check for redirect loops and chain length
+                    if (!redirectTo) {
+                        console.debug(`Skipping redirect: rule ${rule.regex} produced no redirect target for path ${path}`);
+                    } else if (redirectChain.length >= MAX_REDIRECTS) {
+                        console.debug(`Stopping: Maximum redirect chain length (${MAX_REDIRECTS}) reached`);
+                        break;
+                    } else if (redirectChain.some(r => r.split('>')[1] === redirectTo)) {
+                        console.debug(`Stopping: Detected loop - ${redirectTo} was already a destination in chain:`, redirectChain);
+                        break;
+                    } else {
+                        // Add this redirect to the chain
+                        const newChain = [...redirectChain, redirectPair];
+                        
+                        const timeoutId = setTimeout(() => {
+                            document.getElementById('loader').style.display = 'none';
+                            document.getElementById('error-content').style.display = 'block';
+                        }, REDIRECT_TIMEOUT);
+                        
+                        // Clear timeout before redirect
+                        clearTimeout(timeoutId);
+                        if (!isLocalFile) {
+                            // Build new URL with updated chain
+                            const newUrl = new URL('/' + pathParts[1] + redirectTo, window.location.origin);
+                            newChain.forEach(r => newUrl.searchParams.append('r', r));
+                            window.location.href = newUrl.toString();
+                        } else {
+                            console.debug(`Would redirect to: ${'/'}${pathParts[1]}${redirectTo}`);
+                            console.debug('Current redirect chain:', newChain);
+                            document.getElementById('loader').style.display = 'none';
+                            document.getElementById('error-content').style.display = 'block';
+                        }
+                        return;
+                    }
+                }
+            }
+            
+            // If we get here, either no redirect rule matched or we detected a redirect loop
+            console.debug('No valid redirect found for path:', path);
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('error-content').style.display = 'block';
+        }
+
+        window.onload = redirectToPage;
+    </script>
+</head>
+
+<body>
+    <span id="loader" class="loader"></span>
+    <div id="error-content">
+        <svg class="ghost" width="120" height="120" viewBox="0 0 120 120">
+            <g class="ghost-body">
+                <!-- Ghost body -->
+                <path fill="#f0f0f0" stroke="#343a40" stroke-width="3" 
+                    d="M30,50 C30,30 50,15 60,15 C70,15 90,30 90,50 C90,90 90,105 90,105 L80,95 L70,105 L60,95 L50,105 L40,95 L30,105 C30,105 30,90 30,50 Z" />
+                <!-- Eyes -->
+                <circle cx="50" cy="45" r="4" fill="#343a40" />
+                <circle cx="70" cy="45" r="4" fill="#343a40" />
+            </g>
+        </svg>
+        <h1>Oops! Page Not Found</h1>
+        <p>We can't find the page you're looking for. The automatic redirect either failed or took too long.</p>
+    </div>
+</body>
+
+</html>

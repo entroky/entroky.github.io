@@ -1,0 +1,24 @@
+\import{spin-macros}
+% clifford hopf spin draft
+\tag{clifford}
+
+% definition theorem lemma construction observation
+% convention corollary axiom example exercise proof
+% discussion remark notation
+% \taxon{}
+% \refcardt{lemma}{}{}{}{
+
+% jadczyk2019notes garling2011clifford chen2016infinitely
+% hestenes2012clifford wieser2022formalizing wieser2024formalizing wieser2024blueprint
+
+\card{definition}{title}{
+
+}
+
+\refdeft{title}{citeid}{garling2011clifford}{
+
+}
+
+\minitex{
+
+}
