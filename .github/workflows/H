@@ -1,0 +1,167 @@
+name: Deploy My Forest to Pages (Containerized)
+
+on:
+  push:
+    paths-ignore:
+      - "LICENSE"
+      - "README.md"
+    branches:
+      - main
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: recursive
+
+      - name: Install System Dependencies in Container
+        run: |
+          apt-get update -yq
+          apt-get install -yq --no-install-recommends \
+            ca-certificates curl git sudo wget \
+            bubblewrap \
+            musl musl-dev musl-tools \
+            libev-dev libev4
+          dpkg -s bubblewrap musl musl-dev musl-tools libev-dev libev4
+
+      - name: Cache Just
+        id: cache-just
+        uses: actions/cache@v4
+        with:
+          path: /root/.local/bin/just
+          key: container-${{ runner.os }}-just-1.40.0
+      - name: Setup Just
+        uses: extractions/setup-just@v1
+        with:
+          just-version: 1.40.0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.1.29
+      - name: Cache Bun Global
+        id: cache-bun
+        uses: actions/cache@v4
+        with:
+          path: /root/.bun/install/cache
+          key: container-${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            container-${{ runner.os }}-bun-
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: 1.8.3
+
+      - name: Cache TeX Live packages
+        id: cache-texlive
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/texlive/
+          key: container-${{ runner.os }}-texlive-${{ hashFiles('**/action.yml') }}
+          restore-keys: |
+            container-${{ runner.os }}-texlive-
+      - name: Setup TeX Live Minimal
+        uses: teatimeguest/setup-texlive-action@v3
+        id: setup_texlive
+        with:
+          packages: >
+            scheme-basic
+            amsmath amsfonts amssymb graphicx geometry ifthen xcolor hyperref float booktabs
+            enumerate xspace xpatch mathtools stmaryrd csquotes standalone microtype tools collection-latexrecommended
+            fontspec newpxtext newpxmath utfsym newunicodechar collection-fontsrecommended
+            listings
+            tikz pgfplots tikz-cd tikz-3dplot tkz-euclide contour dot2texi
+            algpseudocodex pseudo tabto tabularx
+            amsthm thmtools mdframed tcolorbox ntheorem
+            imakeidx cleveref backref makeindex bibtex
+            physics worldflags todonotes
+            xelatex
+
+      - name: Setup OCaml and OPAM
+        id: setup-ocaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.3.0"
+
+      - name: Install Forester
+        run: |
+          eval $(opam env --shell=bash)
+          FORESTER_COMMIT="56de06afe952d752c1a13fdcd8bb56c5fef9956f"
+          if ! opam show forester --field=pin | grep -q "$FORESTER_COMMIT"; then
+            opam pin add forester "git+https://git.sr.ht/~jonsterling/ocaml-forester#${FORESTER_COMMIT}" --no-action --yes
+            opam install forester --yes --deps-only
+            opam install forester --yes
+          else
+            opam install forester --yes
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        id: pages
+        if: ${{ !env.ACT }}
+
+      - name: Build Project
+        run: |
+          eval $(opam env --shell=bash)
+          export TERM=xterm-256color
+          opam exec -- forester --version
+          bash ./build.sh
+
+      - name: Verify PDF Output
+        run: |
+          pdf_count=$(find ./output -name "*.pdf" -type f | wc -l)
+          if [ "$pdf_count" -eq 0 ]; then
+            echo "::error::No PDF files found in the ./output directory after build."
+          else
+            echo "Found $pdf_count PDF files in ./output."
+          fi
+
+      - name: Fix Output Permissions
+        run: |
+          if [ -d "./output" ]; then
+            chmod -c -R +rX "./output/" | while read line; do
+              echo "::warning title=Invalid file permissions automatically fixed::$line"
+            done
+          else
+            echo "::error::Output directory './output' not found after build."
+            exit 1
+          fi
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./output
+        if: ${{ !env.ACT }}
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
