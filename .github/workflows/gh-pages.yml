@@ -101,20 +101,21 @@ jobs:
           # forester.opam
          # dune-cache: true
          # Consider enabling if build times are long and disk space allows
-      - name: Cache opam packages # Opam cache can be large, might conflict with freeing space
-        uses: actions/cache@v4
-        with:
-           path: ~/.opam
-           key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
-           restore-keys: |
-            ${{ runner.os }}-opam-
-            
+    
       - name: Install Forester
         run: |
           git clone https://git.sr.ht/~jonsterling/ocaml-forester
           cd ocaml-forester
           git checkout forester-5.0-dev
           opam pin add -y .
+           - name: Cache opam packages # Opam cache can be large, might conflict with freeing space
+             uses: actions/cache@v4
+             with:
+               path: ~/.opam
+               key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
+               restore-keys: |
+                  ${{ runner.os }}-opam-
+            
       # https://github.com/astral-sh/setup-uv
       - name: Setup Python via uv
         uses: astral-sh/setup-uv@v3
