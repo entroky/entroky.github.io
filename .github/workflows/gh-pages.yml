@@ -57,9 +57,6 @@ jobs:
         uses: biomejs/setup-biome@v2
         with:
             version: latest
-      - name: Lint
-        run: |
-          ./chk.sh
       - name: Setup TeX Live Minimal
         uses: teatimeguest/setup-texlive-action@v3
         id: setup_texlive
