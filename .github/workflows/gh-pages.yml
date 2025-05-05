@@ -41,11 +41,11 @@ jobs:
         with:
 
           tool-cache: true # Changed from your example 'false' to 'true' to actually remove the tool cache
-          android: false
-          dotnet: false
-          haskell: false
+          android: true
+          dotnet: true
+          haskell: true
           large-packages: false
-          docker-images: true
+          docker-images: false
           swap-storage: true
       - uses: extractions/setup-just@v1
         with:
@@ -89,14 +89,14 @@ jobs:
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: "5.3.0"
-          # dune-cache: true # Consider enabling if build times are long and disk space allows
-      # - name: Cache opam packages # Opam cache can be large, might conflict with freeing space
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: ~/.opam
-      #     key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-opam-
+          dune-cache: true # Consider enabling if build times are long and disk space allows
+      - name: Cache opam packages # Opam cache can be large, might conflict with freeing space
+        uses: actions/cache@v4
+        with:
+           path: ~/.opam
+           key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
+           restore-keys: |
+            ${{ runner.os }}-opam-
       - name: Install forester dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y libev-dev
@@ -117,7 +117,7 @@ jobs:
         run: |
           eval $(opam env)
           export TERM=xterm-256color
-          forester --version
+          opam exec -- forester --version
           bash ./build.sh
       - name: Check for PDF files
         run: |
