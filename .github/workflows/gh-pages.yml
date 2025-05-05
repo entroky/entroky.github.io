@@ -97,8 +97,8 @@ jobs:
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: "5.3.0"
-          opam-local-packages: |
-            forester.opam
+          #opam-local-packages: |
+          # forester.opam
          # dune-cache: true
          # Consider enabling if build times are long and disk space allows
       - name: Cache opam packages # Opam cache can be large, might conflict with freeing space
@@ -108,13 +108,13 @@ jobs:
            key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
            restore-keys: |
             ${{ runner.os }}-opam-
-
-      - name: Install forester
+            
+      - name: Install Forester
         run: |
-          # opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester --yes
-          #opam install forester --yes --deps-only # Install dependencies first
-          #opam install forester --yes # Then install forester itself
-          # opam install forester.4.3.1 --yes
+          git clone https://git.sr.ht/~jonsterling/ocaml-forester
+          cd ocaml-forester
+          git checkout forester-5.0-dev
+          opam pin add -y .
       # https://github.com/astral-sh/setup-uv
       - name: Setup Python via uv
         uses: astral-sh/setup-uv@v3
