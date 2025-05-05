@@ -1,4 +1,4 @@
-name: Deploy My Forest to Pages (Containerized)
+name: Deploy M Forest to Pages (Containerized)
 
 on:
   push:
