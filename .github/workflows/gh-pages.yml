@@ -123,7 +123,7 @@ jobs:
       - name: Clone and Pin Forester
         if: steps.cache-forester.outputs.cache-hit != 'true'
         run: |
-          git clone https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --yes
+          git clone https://git.sr.ht/~jonsterling/ocaml-forester 56de06afe952d752c1a13fdcd8bb56c5fef9956f
           cd ocaml-forester
           git checkout forester-5.0-dev
           opam pin add -y .
