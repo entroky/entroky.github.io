@@ -45,7 +45,7 @@ jobs:
           haskell: true
           large-packages: false
           docker-images: false
-          swap-storage: true
+          swap-storage: false
       # Boost installation with caching
       - name: Cache boost libraries
         uses: actions/cache@v4
