@@ -18,7 +18,7 @@ defaults:
   run:
     shell: bash
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Page
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
@@ -27,7 +27,7 @@ permissions:
 jobs:
   # Build job
   build:
-    runs-on: ubuntu-22.04 # ubuntu-latest is currently 22.04, but being explicit is fine
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,7 +35,12 @@ jobs:
           ref: main
           submodules: recursive
 
-      # <<<--- ADDED STEP: Free up disk space early --->>>
+      # Install the missing dependency 'ppx_blob'
+      - name: Install Missing Dependency
+        run: |
+          eval $(opam env)
+          opam update
+          opam install -y ppx_blob
 
       - name: Prepare and Upload Dependencies Artifact
         run: |
@@ -69,7 +74,7 @@ jobs:
         uses: teatimeguest/setup-texlive-action@v3
         id: setup_texlive
         with:
-          packages: > # Minimal set based on ent/tex analysis
+          packages: >
             scheme-basic
             amsmath amsfonts amssymb graphicx geometry ifthen xcolor hyperref float booktabs
             enumerate xspace xpatch mathtools stmaryrd csquotes standalone microtype tools collection-latexrecommended
@@ -137,20 +142,6 @@ jobs:
           opam exec -- forester --version
           bash ./build.sh
 
-            
-      # https://github.com/astral-sh/setup-uv
-      - name: Setup Python via uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          version: "0.4.27"
-          # enable-cache: true # UV cache might also consume space
-
-      - name: Build with forester
-        run: |
-          eval $(opam env)
-          export TERM=xterm-256color
-          opam exec -- forester --version
-          bash ./build.sh
       - name: Check for PDF files
         run: |
           pdf_count=$(find ./output -name "*.pdf" | wc -l)
@@ -158,11 +149,13 @@ jobs:
             echo "Error: No PDF files found in the output directory."
           fi
           echo "Found $pdf_count PDF files."
+
       - name: Fix permissions
         run: |
           chmod -c -R +rX "./output/" | while read line; do
             echo "::warning title=Invalid file permissions automatically fixed::$line"
           done
+
       - name: Upload Pages artifact
         if: ${{ !env.ACT }}
         uses: actions/upload-pages-artifact@v3
