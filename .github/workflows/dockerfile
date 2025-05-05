@@ -1,0 +1,57 @@
+# Use Debian Slim base image
+FROM debian:12.5-slim
+
+# Metadata
+LABEL maintainer="entroky@example.com" \
+    org.opencontainers.image.title="Rapid Build Environment" \
+    org.opencontainers.image.description="Custom image for building entroky.github.io"
+
+# Set non-interactive mode for apt-get
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    opam \
+    git \
+    m4 \
+    unzip \
+    pkg-config \
+    libgmp-dev \
+    ca-certificates \
+    texlive-base \
+    texlive-latex-extra \
+    texlive-xetex \
+    texlive-fonts-recommended \
+    texlive-pictures \
+    curl \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Initialize OPAM and set environment variables for OCaml
+RUN opam init --disable-sandboxing --yes && \
+    opam update
+
+# Clone and build Forester at a specific commit
+RUN git clone https://git.sr.ht/~jonsterling/ocaml-forester /usr/src/forester && \
+    cd /usr/src/forester && \
+    git checkout 56de06afe952d752c1a13fdcd8bb56c5fef9956f && \
+    opam pin add forester . --yes && \
+    opam install forester --yes
+
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash
+
+# Add Bun to PATH
+ENV PATH="/root/.bun/bin:$PATH"
+
+# Copy scripts and configuration into the container
+WORKDIR /usr/src/app
+COPY . .
+
+# Make scripts executable
+RUN chmod +x build.sh dev.sh
+
+# Default command
+CMD ["bash"]
