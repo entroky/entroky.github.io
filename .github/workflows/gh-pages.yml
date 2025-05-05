@@ -73,16 +73,6 @@ jobs:
             imakeidx cleveref backref makeindex bibtex
             physics worldflags todonotes
             xelatex
-
-      - name: Check TeX Live Installation
-        run: |
-          echo "GITHUB_PATH is: $GITHUB_PATH"
-          tlmgr --version
-          which latex
-          which xelatex
-          which bibtex
-          which makeindex
-
       - name: Cache HTML files
         uses: actions/cache@v4
         with:
