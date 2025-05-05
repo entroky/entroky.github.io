@@ -39,7 +39,7 @@ jobs:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main # Use a specific commit SHA or tag for stability if preferred
         with:
-          tool-cache: true # Changed from your example 'false' to 'true' to actually remove the tool cache
+          tool-cache: false
           android: true
           dotnet: true
           haskell: true
@@ -74,14 +74,6 @@ jobs:
                 dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/boost/
             done
           fi
-      - name: mkdir
-        run: mkdir build
-      - name: cmake build
-        run: cmake -Bbuild -H.
-      - name: cmake make
-        run: cmake --build build/ --target all
-        env:
-          MAKEFLAGS: "-j2"
       - uses: extractions/setup-just@v1
         with:
           just-version: 1.40.0
@@ -120,59 +112,27 @@ jobs:
         if: ${{ !env.ACT }}
         id: pages
         uses: actions/configure-pages@v5
-
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: "5.3.0" # Use a specific version compatible with forester if needed
-          dune-cache: true
-
-      - name: Cache opam packages
+          ocaml-compiler: "5.3.0"
+          dune-cache: true # Consider enabling if build times are long and disk space allows
+      - name: Cache opam packages # Opam cache can be large, might conflict with freeing space
         uses: actions/cache@v4
         with:
            path: ~/.opam
-           # Use a key that includes the OCaml version and potentially OS
-           key: ${{ runner.os }}-ocaml-${{ matrix.ocaml-compiler || '5.3.0' }}-opam-${{ hashFiles('**/*.opam') }}
+           key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
            restore-keys: |
-            ${{ runner.os }}-ocaml-${{ matrix.ocaml-compiler || '5.3.0' }}-opam-
-            ${{ runner.os }}-ocaml-
             ${{ runner.os }}-opam-
-
-      - name: Check if forester is already installed and working
-        id: check_forester # Give the step an ID to reference its outcome
+      - name: Install forester dependencies
         run: |
-          eval $(opam env)
-          export TERM=xterm-256color
-          echo "Attempting to find forester..."
-          opam exec -- forester --version
-        # Don't fail the workflow if forester isn't found; we'll install it later.
-        continue-on-error: true
-
-      - name: Install System Dependencies (if needed)
-        # Only run this step if the check_forester step failed (i.e., forester wasn't found)
-        if: steps.check_forester.outcome == 'failure'
-        run: |
-          echo "Forester not found or check failed. Installing system dependencies..."
           sudo apt-get update && sudo apt-get install -y libev-dev
-
-      - name: Install forester (if needed)
-        # Only run this step if the check_forester step failed
-        if: steps.check_forester.outcome == 'failure'
+      - name: Install forester
         run: |
-          echo "Forester not found or check failed. Installing forester via opam..."
-          opam update # Good practice before pinning/installing
-          # Pin the specific commit
           opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --yes
-          # Install dependencies first, then the package itself
-          opam install forester --yes --deps-only
-          opam install forester --yes
-          echo "Forester installation complete."
-
-  
-
-      # Add your subsequent steps that use forester here
-      # - name: Use forester
-      #   run: opam exec -- forester ... your command ...
+          opam install forester --yes --deps-only # Install dependencies first
+          opam install forester --yes # Then install forester itself
+          # opam install forester.4.3.1 --yes
       # https://github.com/astral-sh/setup-uv
       - name: Setup Python via uv
         uses: astral-sh/setup-uv@v3
