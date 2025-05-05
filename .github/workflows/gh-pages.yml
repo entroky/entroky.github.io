@@ -8,7 +8,7 @@ on:
     branches:
       - main
 
-# Allow one concurrent deployment
+# Allow 1 concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
