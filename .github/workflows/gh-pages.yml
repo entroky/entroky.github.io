@@ -104,13 +104,11 @@ jobs:
           ocaml-compiler: "5.3.0"
           dune-cache: true
 
-      # Cache opam packages
-      - uses: actions/cache@v4
-        with:
-          path: ~/.opam
-          key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
-          restore-keys: |
-            ${{ runner.os }}-opam-
+      # Install ppx_blob
+      - name: Install ppx_blob
+        run: |
+          eval $(opam env)
+          opam install ppx_blob --yes
 
       # Cache Forester repository
       - name: Cache Forester Repository
