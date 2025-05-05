@@ -44,6 +44,8 @@ jobs:
           android: true
           dotnet: true
           haskell: true
+          musl-dev: false
+          musl-tools: false
           large-packages: false
           docker-images: false
           swap-storage: true
@@ -127,7 +129,7 @@ jobs:
           echo "Forester not found or check failed. Installing forester via opam..."
           opam update # Good practice before pinning/installing
           # Pin the specific commit
-          # opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --yes --no-action
+          opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --yes
           # Install dependencies first, then the package itself
           opam install forester --yes --deps-only
           opam install forester --yes
