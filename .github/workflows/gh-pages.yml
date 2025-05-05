@@ -64,6 +64,7 @@ jobs:
             sudo apt-get update && \
             sudo apt-get install -yq --no-install-recommends \
             libboost-all-dev \
+            libev-dev \
             libev4 \
             bubblewrap \
             musl \
@@ -124,9 +125,7 @@ jobs:
            key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
            restore-keys: |
             ${{ runner.os }}-opam-
-      - name: Install forester dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y libev-dev
+
       - name: Install forester
         run: |
           opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --yes
