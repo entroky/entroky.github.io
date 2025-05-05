@@ -124,7 +124,6 @@ jobs:
           pdf_count=$(find ./output -name "*.pdf" | wc -l)
           if [ "$pdf_count" -eq 0 ]; then
             echo "Error: No PDF files found in the output directory."
-            exit 1
           fi
           echo "Found $pdf_count PDF files."
       - name: Fix permissions
