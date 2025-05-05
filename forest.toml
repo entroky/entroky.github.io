@@ -4,5 +4,8 @@ assets = ["assets"]
 prefixes = ["mfk", "uts"]
 theme = "theme"
 root = "index"
-base_url = "https://utensil.github.io/forest/"
+url = "https://entroky.github.io/"
 stylesheet = "uts-forest.xsl"
+
+[renderer]
+home = "index"
