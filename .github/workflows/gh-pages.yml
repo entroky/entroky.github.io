@@ -39,16 +39,48 @@ jobs:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main # Use a specific commit SHA or tag for stability if preferred
         with:
-
           tool-cache: true # Changed from your example 'false' to 'true' to actually remove the tool cache
           android: true
           dotnet: true
           haskell: true
-          musl-dev: false
-          musl-tools: false
           large-packages: false
           docker-images: false
           swap-storage: true
+      # Boost installation with caching
+      - name: Cache boost libraries
+        uses: actions/cache@v4
+        id: cache-boost
+        with:
+          path: ~/boost
+          key: libboost1.74-dev-${{ runner.os }}  # Update version to match your needs
+
+      - name: Install Boost
+        env:
+          CACHE_HIT: ${{ steps.cache-boost.outputs.cache-hit }}
+        run: |
+          if [[ "$CACHE_HIT" == 'true' ]]; then
+            sudo cp --force --recursive ~/boost/* /
+          else
+            sudo apt-get update && \
+            sudo apt-get install -y --no-install-recommends \
+            libboost-all-dev \
+            libev4 \
+            bubblewrap \
+            musl \
+            musl-dev \
+            musl-tools
+            mkdir -p ~/boost
+            for dep in libboost-all-dev; do
+                dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/boost/
+            done
+          fi
+
+      # Build and test project
+      - name: Configure CMake
+        run: cmake -B build -S .
+
+      - name: Build project
+        run: cmake --build build --parallel 2
       - uses: extractions/setup-just@v1
         with:
           just-version: 1.40.0
