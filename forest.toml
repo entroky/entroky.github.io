@@ -1,7 +1,8 @@
 [forest]
 trees = ["trees"]
 assets = ["assets"]
-prefixes = ["mfk"]
+prefixes = ["mfk", "uts"]
 theme = "theme"
 root = "index"
+base_url = "https://utensil.github.io/forest/"
 stylesheet = "uts-forest.xsl"
