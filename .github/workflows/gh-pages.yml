@@ -85,17 +85,6 @@ jobs:
         if: ${{ !env.ACT }}
         id: pages
         uses: actions/configure-pages@v5
-name: Build and Test Forester
-
-on: [push, pull_request]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code # Assuming you need your repo code, otherwise optional
-        uses: actions/checkout@v4
 
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
