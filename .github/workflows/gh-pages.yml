@@ -1,4 +1,4 @@
-name: Deploy My forest to Pages
+name: Deploy My Forest to Pages
 
 on:
   push:
@@ -18,7 +18,7 @@ defaults:
   run:
     shell: bash
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Page
 permissions:
   contents: read
   pages: write
@@ -35,21 +35,13 @@ jobs:
           ref: main
           submodules: recursive
 
-      # Install the missing dependency 'ppx_blob'
-      - name: Install Missing Dependency
-        run: |
-          eval $(opam env)
-          opam update
-          opam install -y ppx_blob
-
+      # Free up disk space
       - name: Prepare and Upload Dependencies Artifact
         run: |
           PACKAGES="libev-dev libev4 bubblewrap musl musl-dev musl-tools"
           TARGET_DIR="${{ github.workspace }}/boost_deps"
-
           sudo apt-get update -yq && \
           sudo apt-get install -yq --no-install-recommends $PACKAGES
-
           mkdir -p "$TARGET_DIR"
           dpkg -L $PACKAGES | while IFS= read -r item; do
             if [ -e "$item" ] && [ ! -d "$item" ]; then
@@ -60,21 +52,27 @@ jobs:
         with:
           name: boost-dependencies
           path: ${{ github.workspace }}/boost_deps
+
+      # Setup Just
       - uses: extractions/setup-just@v1
         with:
           just-version: 1.40.0
+
+      # Setup Bun
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.1.29
-      - name: Setup Biome
-        uses: biomejs/setup-biome@v2
+
+      # Setup Biome
+      - uses: biomejs/setup-biome@v2
         with:
-            version: latest
-      - name: Setup TeX Live Minimal
-        uses: teatimeguest/setup-texlive-action@v3
+          version: latest
+
+      # Setup TeX Live Minimal
+      - uses: teatimeguest/setup-texlive-action@v3
         id: setup_texlive
         with:
-          packages: >
+          packages: > # Minimal set based on ent/tex analysis
             scheme-basic
             amsmath amsfonts amssymb graphicx geometry ifthen xcolor hyperref float booktabs
             enumerate xspace xpatch mathtools stmaryrd csquotes standalone microtype tools collection-latexrecommended
@@ -86,81 +84,78 @@ jobs:
             imakeidx cleveref backref makeindex bibtex
             physics worldflags todonotes
             xelatex
-      - name: Cache HTML files
-        uses: actions/cache@v4
+
+      # Cache HTML files
+      - uses: actions/cache@v4
         with:
           path: output/*.html
           key: ${{ runner.os }}-html-${{ hashFiles('output/*.xml', 'output/*.xsl') }}
           restore-keys: |
             ${{ runner.os }}-html-
 
-      - name: Setup Pages
-        if: ${{ !env.ACT }}
+      # Setup Pages
+      - uses: actions/configure-pages@v5
         id: pages
-        uses: actions/configure-pages@v5
-      - name: Set-up OCaml
-        uses: ocaml/setup-ocaml@v3
+        if: ${{ !env.ACT }}
+
+      # Set up OCaml
+      - uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: "5.3.0"
+          dune-cache: true
 
-      - name: Cache OPAM packages
-        uses: actions/cache@v4
+      # Cache opam packages
+      - uses: actions/cache@v4
         with:
           path: ~/.opam
           key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
           restore-keys: |
             ${{ runner.os }}-opam-
 
-      - name: Clone Forester repository
+      # Cache Forester repository
+      - name: Cache Forester Repository
+        uses: actions/cache@v4
+        with:
+          path: ocaml-forester
+          key: ${{ runner.os }}-forester-repo-${{ hashFiles('**/*.opam') }}
+          restore-keys: |
+            ${{ runner.os }}-forester-repo-
+
+      # Clone and Pin Forester (only if not cached)
+      - name: Clone and Pin Forester
+        if: steps.cache-forester.outputs.cache-hit != 'true'
         run: |
           git clone https://git.sr.ht/~jonsterling/ocaml-forester
           cd ocaml-forester
           git checkout forester-5.0-dev
-
-      - name: Install Forester dependencies
-        run: |
-          cd ocaml-forester
-          opam install -y --deps-only .
-
-      - name: Install Forester
-        run: |
-          cd ocaml-forester
           opam pin add -y .
 
-      - name: Cache updated OPAM packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.opam
-          key: ${{ runner.os }}-opam-${{ hashFiles('**/*.opam') }}
-          restore-keys: |
-            ${{ runner.os }}-opam-
-
-      - name: Build with Forester
-        run: |
+      # Build with Forester
+      - run: |
           eval $(opam env)
           export TERM=xterm-256color
           opam exec -- forester --version
           bash ./build.sh
 
-      - name: Check for PDF files
-        run: |
+      # Check for PDF files
+      - run: |
           pdf_count=$(find ./output -name "*.pdf" | wc -l)
           if [ "$pdf_count" -eq 0 ]; then
             echo "Error: No PDF files found in the output directory."
           fi
           echo "Found $pdf_count PDF files."
 
-      - name: Fix permissions
-        run: |
+      # Fix permissions
+      - run: |
           chmod -c -R +rX "./output/" | while read line; do
             echo "::warning title=Invalid file permissions automatically fixed::$line"
           done
 
-      - name: Upload Pages artifact
-        if: ${{ !env.ACT }}
-        uses: actions/upload-pages-artifact@v3
+      # Upload Pages artifact
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: ./output
+        if: ${{ !env.ACT }}
 
   # Deploy job
   deploy:
@@ -170,6 +165,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
