@@ -74,14 +74,14 @@ jobs:
                 dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/boost/
             done
           fi
-
-      # Build and test project
-      - name: Configure CMake
-        run: cmake -B build -S .
-
-      - name: Build project
-        run: cmake --build build --parallel 2
-        
+      - name: mkdir
+        run: mkdir build
+      - name: cmake build
+        run: cmake -Bbuild -H.
+      - name: cmake make
+        run: cmake --build build/ --target all
+        env:
+          MAKEFLAGS: "-j2"
       - uses: extractions/setup-just@v1
         with:
           just-version: 1.40.0
