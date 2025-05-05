@@ -36,19 +36,10 @@ jobs:
           submodules: recursive
 
       # <<<--- ADDED STEP: Free up disk space early --->>>
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main # Use a specific commit SHA or tag for stability if preferred
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: false
-          swap-storage: false
+
       - name: Prepare and Upload Dependencies Artifact
         run: |
-          PACKAGES="libboost-all-dev libev-dev libev4 bubblewrap musl musl-dev musl-tools"
+          PACKAGES="libev-dev libev4 bubblewrap musl musl-dev musl-tools"
           TARGET_DIR="${{ github.workspace }}/boost_deps"
 
           sudo apt-get update -yq && \
