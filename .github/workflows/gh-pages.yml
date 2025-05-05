@@ -46,35 +46,20 @@ jobs:
           large-packages: false
           docker-images: false
           swap-storage: false
-      # Boost installation with caching
-      - name: Cache boost libraries
-        uses: actions/cache@v4
-        id: cache-boost
-        with:
-          path: ~/boost
-          key: libboost1.74-dev-${{ runner.os }}  # Update version to match your needs
-
-      - name: Install Boost
-        env:
-          CACHE_HIT: ${{ steps.cache-boost.outputs.cache-hit }}
+      - name: Prepare and Upload Dependencies Artifact
         run: |
-          if [[ "$CACHE_HIT" == 'true' ]]; then
-            sudo cp --force --recursive ~/boost/* /
-          else
-            sudo apt-get update && \
-            sudo apt-get install -yq --no-install-recommends \
-            libboost-all-dev \
-            libev-dev \
-            libev4 \
-            bubblewrap \
-            musl \
-            musl-dev \
-            musl-tools
-            mkdir -p ~/boost
-            for dep in libboost-all-dev; do
-                dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/boost/
-            done
-          fi
+          PACKAGES="libboost-all-dev libev-dev libev4 bubblewrap musl musl-dev musl-tools"
+          TARGET_DIR="${{ github.workspace }}/boost_deps"
+
+          sudo apt-get update -yq && \
+          sudo apt-get install -yq --no-install-recommends $PACKAGES
+
+          mkdir -p "$TARGET_DIR"
+          dpkg -L $PACKAGES | xargs -rd '\n' --no-run-if-empty cp --parents --target-directory "$TARGET_DIR/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boost-dependencies
+          path: ${{ github.workspace }}/boost_deps
       - uses: extractions/setup-just@v1
         with:
           just-version: 1.40.0
