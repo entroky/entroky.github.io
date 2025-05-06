@@ -1,5 +1,5 @@
-# Use Debian Slim base image
-FROM debian:12.5-slim AS builder
+# Use Debian Slim base image (matches ubuntu-22.04 closely enough for most packages)
+FROM debian:12.5-slim
 
 # Metadata
 LABEL maintainer="entroky@example.com" \
@@ -10,10 +10,13 @@ LABEL maintainer="entroky@example.com" \
 ARG DEBIAN_FRONTEND=noninteractive
 ENV OPAMROOT="/root/.opam" \
     OPAMYES="true" \
-    PATH="/root/.bun/bin:${OPAMROOT}/default/bin:${PATH}" \
-    TERM="xterm-256color"
+    PATH="/root/.bun/bin:${OPAMROOT}/default/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/texlive/bin/linux" \
+    TERM="xterm-256color" \
+    # Set TEXINPUTS globally in the container, matching build.sh logic
+    TEXINPUTS=".:/usr/src/app/tex/:"
 
 # Install base system dependencies, including tools for TeX Live and Just installation
+# Added wget and gnupg for tlmgr setup
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
@@ -27,6 +30,7 @@ RUN apt-get update && \
     curl \
     wget \
     gnupg \
+    perl \
     # Minimal TeX Live base needed for tlmgr
     texlive-base \
     && apt-get clean && \
@@ -40,11 +44,29 @@ RUN curl -LSfs "https://github.com/casey/just/releases/download/${JUST_VERSION}/
 ARG BUN_VERSION=1.1.29
 RUN curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}"
 
-# Install Minimal TeX Live packages identified in gh-pages.yml
-# Use --no-depends where appropriate if base packages provide functionality
-# Adjust path if texlive installed elsewhere by base package
-ENV PATH="/usr/bin:${PATH}"
-RUN tlmgr option repository ctan && \
+# Install Minimal TeX Live packages identified in gh-pages.yml using tlmgr
+# Using a profile for potentially smaller install footprint
+RUN wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz && \
+    tar -xzf install-tl-unx.tar.gz && \
+    cd install-tl-*/ && \
+    # Create a minimal profile
+    echo "selected_scheme scheme-minimal" > texlive.profile && \
+    echo "TEXDIR /usr/local/texlive" >> texlive.profile && \
+    echo "TEXMFLOCAL /usr/local/texlive/texmf-local" >> texlive.profile && \
+    echo "TEXMFSYSVAR /usr/local/texlive/texmf-var" >> texlive.profile && \
+    echo "TEXMFSYSCONFIG /usr/local/texlive/texmf-config" >> texlive.profile && \
+    echo "instopt_adjustpath 1" >> texlive.profile && \
+    echo "instopt_adjustrepo 1" >> texlive.profile && \
+    echo "tlpdbopt_autobackup 0" >> texlive.profile && \
+    echo "tlpdbopt_install_docfiles 0" >> texlive.profile && \
+    echo "tlpdbopt_install_srcfiles 0" >> texlive.profile && \
+    # Install using the profile
+    ./install-tl --profile=texlive.profile && \
+    cd .. && rm -rf install-tl-* install-tl-unx.tar.gz && \
+    # Add TeX Live bin to PATH explicitly for subsequent RUN commands
+    export PATH="/usr/local/texlive/bin/linux:${PATH}" && \
+    # Install specific packages
+    tlmgr option repository ctan && \
     tlmgr update --self && \
     tlmgr install \
     scheme-basic \
@@ -58,7 +80,12 @@ RUN tlmgr option repository ctan && \
     imakeidx cleveref backref makeindex bibtex \
     physics worldflags todonotes \
     xelatex \
-    && tlmgr path add
+    # Add any packages potentially missed by scheme-basic but needed by the above
+    latex-bin \
+    luatex \
+    context \
+    # Clean up tlmgr cache
+    && rm -rf /usr/local/texlive/texmf-var/web2c/tlmgr.log /tmp/install-tl* /root/.texlive*
 
 # Initialize OPAM (matching OCaml version from gh-pages.yml)
 # Disable sandboxing for CI environment
@@ -94,37 +121,8 @@ COPY . .
 # Ensure build scripts are executable
 RUN chmod +x act.sh alias.sh bib.sh build.sh build_changed.sh chk.sh convert_xml.sh dev.sh ext.sh lize.sh lost.sh new.sh prep.sh thm.sh scripts/*.sh
 
-# Set the default command to run the build via Just
-CMD ["just", "build"]
-
-# --- Final Image ---
-# Create a smaller final image by copying only necessary artifacts
-FROM debian:12.5-slim
-
-# Install runtime dependencies (e.g., ca-certificates, potentially others if needed by bun runtime)
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Copy necessary binaries and runtime files from the builder stage
-COPY --from=builder /usr/local/bin/just /usr/local/bin/just
-COPY --from=builder /root/.bun /root/.bun
-COPY --from=builder ${OPAMROOT} ${OPAMROOT}
-COPY --from=builder /usr/bin/forester /usr/bin/forester # Adjust path if needed
-COPY --from=builder /usr/bin/opam /usr/bin/opam
-COPY --from=builder /usr/bin/ocaml* /usr/bin/ # Copy OCaml runtime if needed separately
-# Copy TeX Live runtime files (this can be complex and large) - Simplification: just copy the app + node_modules
-# COPY --from=builder /usr/share/texlive /usr/share/texlive
-# COPY --from=builder /usr/bin/xelatex /usr/bin/xelatex # etc.
-
-# Set PATH for the final image
-ENV OPAMROOT="/root/.opam" \
-    PATH="/root/.bun/bin:${OPAMROOT}/default/bin:/usr/local/bin:/usr/bin:/bin" \
-    TERM="xterm-256color"
-
-WORKDIR /usr/src/app
-COPY --from=builder /usr/src/app .
-
-# Evaluate OPAM env vars in the final image
+# Evaluate OPAM environment variables to make them available
 RUN eval $(opam env)
 
+# Set the default command to run the build via Just
 CMD ["just", "build"]
