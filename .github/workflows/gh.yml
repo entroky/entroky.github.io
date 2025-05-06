@@ -1,0 +1,68 @@
+jobs:
+  build:
+    runs-on: ubuntu-latest # Runner OS
+    container:
+      # Reference the Dockerfile in your repo or a pre-built image on GHCR
+      # Option 1: Build from Dockerfile in repo (slower first time, good for testing)
+      # image: ./.github/workflows/Dockerfile
+      # Option 2: Use a pre-built image (faster workflow runs)
+      image: ghcr.io/YOUR_USERNAME/YOUR_REPO_NAME:latest # Replace with your GHCR image path
+      # credentials: ... # If using a private GHCR image
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Ensure submodules are checked out if theme is a submodule
+          submodules: recursive
+
+      # Cache HTML files (still useful)
+      - name: Cache HTML Output
+        uses: actions/cache@v4
+        with:
+          path: output/*.html
+          # Key depends on XML files and the main XSL stylesheet
+          key: ${{ runner.os }}-html-${{ hashFiles('trees/**/*.tree', 'assets/uts-forest.xsl') }}
+          restore-keys: |
+            ${{ runner.os }}-html-
+
+      # Setup Pages (if deploying to GitHub Pages)
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        id: pages
+        # Add condition if needed, e.g., if: github.ref == 'refs/heads/main' && !env.ACT
+
+      # Build step - Now much simpler!
+      # The container has just, bun, opam, forester, texlive pre-installed
+      - name: Build Project
+        run: just build # This should execute your build.sh via the justfile
+
+      # Check for PDF files (optional but good practice)
+      - name: Check for PDF files
+        run: |
+          pdf_count=$(find ./output -name "*.pdf" | wc -l)
+          if [ "$pdf_count" -eq 0 ]; then
+            echo "::warning::No PDF files found in the output directory."
+            # Consider exiting with error if PDFs are mandatory:
+            # echo "::error::No PDF files found, expected for build."
+            # exit 1
+          fi
+          echo "Found $pdf_count PDF files."
+
+      # Fix permissions (still potentially needed depending on container user)
+      - name: Fix Permissions
+        run: |
+          chmod -c -R +rX "./output/" | while read line; do
+            echo "::warning title=Invalid file permissions automatically fixed::$line"
+          done
+
+      # Upload Pages artifact (if deploying to GitHub Pages)
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./output
+        # Add condition if needed
+
+  # Deploy job remains the same if you are using GitHub Pages
+  deploy:
+    needs: build
+    # ... rest of deploy job
