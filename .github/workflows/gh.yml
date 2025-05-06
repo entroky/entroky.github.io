@@ -9,9 +9,8 @@ on:
       - "README.md"
       # Ignore changes to the Dockerfile itself or other workflow files from triggering deployment
       - "dockerfile"
-      - ".github/workflows/**"
       # Re-include this file to trigger on its own changes if needed for testing
-      # - "!.github/workflows/gh-pages.yml"
+      - ".github/workflows/gh-pages.yml"
     branches:
       - main
 
