@@ -19,6 +19,7 @@
                 <link rel="stylesheet" href="katex.min.css" />
                 <!-- uts-begin -->
                 <link rel="stylesheet" href="uts-style.css" />
+                <link rel="stylesheet" href="lite-yt-embed.css" />
                 <!-- uts-end -->
                 <script type="text/javascript">
                     <xsl:if test="/f:tree/f:frontmatter/f:source-path">
