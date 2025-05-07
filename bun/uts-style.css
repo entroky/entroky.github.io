@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
  */
+@import url('./lite-yt-embed.css');
 
 :root {
     /* 16:9 */
