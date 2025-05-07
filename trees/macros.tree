@@ -72,7 +72,9 @@
    }
  }
 }
-
+\def\ytb[videoid][title]{
+  \<html:lite-youtube>[videoid]{\videoid}[data-title]{\title}{}
+}
 \p{\code{table[body]}: A table.}
 
 \def\table[body]{
