@@ -7,7 +7,9 @@ on:
       - "README.md"
     branches:
       - main
-
+env:
+  OCAML_VERSION: 5.3.0
+  
 # Allow one concurrent deployment.
 concurrency:
   group: "pages"
@@ -28,20 +30,19 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-22.04
+    env:
+      PLATFORM: linux64
+      OPAMYES: 1
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@main
         with:
-          ref: main
           submodules: recursive
-
-      # Free up disk space
       - name: Prepare and Upload Dependencies Artifact
         run: |
-          PACKAGES="libev-dev libev4 bubblewrap musl musl-dev musl-tools"
+          PACKAGES="darcs bubblewrap ocaml-nox libpcre2-dev zlib1g-dev libgtk2.0-dev libmbedtls-dev ninja-build libev-dev libev4  musl musl-dev musl-tools"
           TARGET_DIR="${{ github.workspace }}/boost_deps"
-          sudo apt-get update -yq && \
-          sudo apt-get install -yq --no-install-recommends $PACKAGES
+          sudo apt-get update -qqy && \
+          sudo apt-get install -qqy $PACKAGES
           mkdir -p "$TARGET_DIR"
           dpkg -L $PACKAGES | while IFS= read -r item; do
             if [ -e "$item" ] && [ ! -d "$item" ]; then
@@ -61,12 +62,7 @@ jobs:
       # Setup Bun
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.1.29
-
-      # Setup Biome
-      - uses: biomejs/setup-biome@v2
-        with:
-          version: latest
+          bun-version: 1.2.12
 
       # Setup TeX Live Minimal
       - uses: teatimeguest/setup-texlive-action@v3
@@ -85,30 +81,34 @@ jobs:
             physics worldflags todonotes
             xelatex
 
-      # Cache HTML files
-      - uses: actions/cache@v4
-        with:
-          path: output/*.html
-          key: ${{ runner.os }}-html-${{ hashFiles('output/*.xml', 'output/*.xsl') }}
-          restore-keys: |
-            ${{ runner.os }}-html-
-
       # Setup Pages
       - uses: actions/configure-pages@v5
         id: pages
         if: ${{ !env.ACT }}
-
-      # Setup OCaml and OPAM
-      - name: Setup OCaml and OPAM
-        uses: ocaml/setup-ocaml@v3
+      - name: Cache opam
+        id: cache-opam
+        uses: actions/cache@v4
         with:
-          ocaml-compiler: "5.3.0"
+          path: ~/.opam/
+          key: ${{ runner.os }}-${{ env.OCAML_VERSION }}-${{ hashFiles('./haxe.opam', './libs/') }}-1
 
-      # Clone and Install Forester (only if cache miss)
-      - name: Clone and Install Forester
+      - name: Install dependencies
         run: |
-          opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --yes
+          set -ex
+          curl -sSL https://github.com/ocaml/opam/releases/download/2.3.0/opam-2.3.0-x86_64-linux -o $RUNNER_TEMP/opam
+          sudo install $RUNNER_TEMP/opam /usr/local/bin/opam
+
+      - name: Install OCaml libraries
+        if: steps.cache-opam.outputs.cache-hit != 'true'
+        run: |
+          set -ex
+          opam init -c ${{ env.OCAML_VERSION }}
+          opam update
+          opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f . --no-action
+          opam install forester --deps-only --assume-depexts
           opam install forester --yes
+          opam list
+          ocamlopt -v
 
       # Build with Forester
       - run: |
@@ -116,7 +116,15 @@ jobs:
           export TERM=xterm-256color
           opam exec -- forester --version
           bash ./build.sh
-
+          
+      # Cache HTML files
+      - uses: actions/cache@v4
+        with:
+          path: output/*.html
+          key: ${{ runner.os }}-html-${{ hashFiles('output/*.xml', 'output/*.xsl') }}
+          restore-keys: |
+            ${{ runner.os }}-html-
+            
       # Check for PDF files
       - run: |
           pdf_count=$(find ./output -name "*.pdf" | wc -l)
