@@ -104,9 +104,9 @@ jobs:
           set -ex
           opam init -c ${{ env.OCAML_VERSION }}
           opam update
-          opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f . --no-action
+          opam pin add forester git+https://git.sr.ht/~jonsterling/ocaml-forester#56de06afe952d752c1a13fdcd8bb56c5fef9956f --no-action
           opam install forester --deps-only --assume-depexts
-          opam install forester --yes
+          opam install forester 
           opam list
           ocamlopt -v
 
