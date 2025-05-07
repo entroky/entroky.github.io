@@ -6,8 +6,9 @@
 % convention corollary axiom example exercise proof
 % discussion remark notation
 \taxon{Definition}
-
+\loadjs{test-three-to-svg.js}
 \note{What is Field #{\FF} ? }{
 Field aboves four rules.
-
+\ytb[dQw4w9WgXcQ][Rick Astley - Never Gonna Give You Up]
+\loadjs{lite-yt-embed.js}
   }
