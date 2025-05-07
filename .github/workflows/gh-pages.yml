@@ -10,7 +10,7 @@ on:
 env:
   OCAML_VERSION: 5.3.0
   
-# Allow one concurrent deployment.
+# Allow 1 concurrent deployment.
 concurrency:
   group: "pages"
   cancel-in-progress: true
