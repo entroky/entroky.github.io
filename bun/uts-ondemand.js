@@ -19,11 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     register('.markdownit', 'markdownit.js')
     register('article code.highlight', 'shiki.js')
     register('.usegpu', 'usegpu.js')
-<<<<<<< HEAD
-    register('lite-youtube', 'lite-yt-embed.js');
-=======
     register('lite-youtube', 'lite-yt-embed.js')
->>>>>>> a168bcb (youtube)
     const hostname = window.location.hostname
 
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
