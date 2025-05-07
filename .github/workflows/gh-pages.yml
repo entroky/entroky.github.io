@@ -1,4 +1,4 @@
-name: Deploy My Forest to Pages
+name: Deploy My Forest
 
 on:
   push:
