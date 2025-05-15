@@ -76,28 +76,28 @@
                 <xsl:choose>
                     <xsl:when test="../f:taxon[text()='Person']">
                         <a class="link-button link-source" title="source"
-                            href="https://github.com/utensil/forest/blob/main/trees/people/{../f:addr}.tree">
+                            href="https://github.com/entroky/entroky.github.io/blob/main/trees/people/{../f:addr}.tree">
                             <xsl:text>✍️</xsl:text>
                             <span>source</span>
                         </a>
                     </xsl:when>
                     <xsl:when test="../f:taxon[text()='Reference']">
                         <a class="link-button link-source" title="source" target="_blank"
-                            href="https://github.com/utensil/forest/blob/main/trees/refs/{../f:addr}.tree">
+                            href="https://github.com/entroky/entroky.github.io/blob/main/trees/refs/{../f:addr}.tree">
                             <xsl:text>✍️</xsl:text>
                             <span>source</span>
                         </a>
                     </xsl:when>
                     <xsl:when test="../f:taxon[text()='Proof']">
                         <a class="link-button link-source" title="source" target="_blank"
-                            href="https://github.com/utensil/forest/blob/main/trees/{../../f:backmatter/f:context/f:tree/f:frontmatter/f:addr}.tree">
+                            href="https://github.com/entroky/entroky.github.io/blob/main/trees/{../../f:backmatter/f:context/f:tree/f:frontmatter/f:addr}.tree">
                             <xsl:text>✍️</xsl:text>
                             <span>source</span>
                         </a>
                     </xsl:when>
                     <xsl:otherwise>
                         <a class="link-button link-source" title="source" target="_blank"
-                            href="https://github.com/utensil/forest/blob/main/trees/{../f:addr}.tree">
+                            href="https://github.com/entroky/entroky.github.io/blob/main/trees/{../f:addr}.tree">
                             <xsl:text>✍️</xsl:text>
                             <span>source</span>
                         </a>
