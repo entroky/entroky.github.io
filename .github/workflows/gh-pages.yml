@@ -41,7 +41,7 @@ jobs:
       - name: Define Package List and Target Directory
         id: prep_vars
         run: |
-          PACKAGES_LIST="darcs bubblewrap ocaml-nox libpcre2-dev zlib1g-dev libgtk2.0-dev libmbedtls-dev ninja-build libev-dev libev4 musl musl-dev musl-tools"
+          PACKAGES_LIST="darcs bubblewrap ocaml-nox libpcre2-dev xsltproc zlib1g-dev libgtk2.0-dev libmbedtls-dev ninja-build libev-dev libev4 musl musl-dev musl-tools"
           echo "PACKAGES=${PACKAGES_LIST}" >> $GITHUB_ENV
           echo "TARGET_DIR=${{ github.workspace }}/boost_deps" >> $GITHUB_ENV
           # Create a hash of the package list for a stable cache key
