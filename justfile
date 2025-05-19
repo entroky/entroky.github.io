@@ -85,6 +85,9 @@ install-shellcheck:
 run-shellcheck:
     shellcheck *.sh
 
+pathfind:
+    npx -y pagefind --site output --serve --root-selector 'article > section'
+
 prep-term:
     which zsh || brew install zsh
     which nvim || brew install neovim
