@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // register('.link-reference', 'backref.js') // it works but not ideal
     register('.markdownit', 'markdownit.js')
     register('article code.highlight', 'shiki.js')
-    register('.usegpu', 'usegpu.js')
     register('lite-youtube', 'lite-yt-embed.js')
     const hostname = window.location.hostname
 
