@@ -71,10 +71,6 @@ typ SOURCE:
     mkdir -p output/typst/
     cp -f {{SOURCE}} output/typst/
 
-penrose SOURCE:
-    mkdir -p output/penrose/
-    cp -f {{SOURCE}} output/penrose/
-
 envs:
     #!/usr/bin/env bash
     echo "PROJECT_ROOT: $PROJECT_ROOT"
