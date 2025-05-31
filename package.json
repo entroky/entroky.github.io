@@ -3,7 +3,6 @@
     "@mariohamann/activity-graph": "^1.0.0",
     "jsdom": "^26.1.0",
     "markdown-it": "^14.1.0",
-    "package.json": "^2.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "saxon-js": "^2.7.0",
