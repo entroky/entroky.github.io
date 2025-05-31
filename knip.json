@@ -1,5 +1,5 @@
 {
     "entry": ["bun/*.{js,ts,jsx,tsx}", "dev.ts", "bun_build.js"],
     "project": ["bun/*.{js,ts,jsx,tsx}"],
-    "ignoreDependencies": ["@use-gpu/.+", "@biomejs/biome", "lightningcss-cli", "wasm-pack"]
+    "ignoreDependencies": [ "@biomejs/biome", "lightningcss-cli"]
   }
