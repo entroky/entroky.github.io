@@ -63,12 +63,6 @@ function bun_build {
   done
 }
 
-function build_ssr {
-  echo "⭐ Rebuilding SSR assets"
-  echo >build/ssr.log
-  bunx roger trios assets/penrose/*.trio.json -o output 1>>build/ssr.log 2>>build/ssr.log
-}
-
 function backup_xml_files() {
   echo "⭐ Backing up XML files"
   mkdir -p output/.bak
