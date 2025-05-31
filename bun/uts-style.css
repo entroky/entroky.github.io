@@ -700,8 +700,6 @@ code.highlight.grace-loading {
     height: unset;
 }
 
-.penrose-root.loading,
-
 
 .optional {
     color: var(--uts-text-gentle);
@@ -763,11 +761,6 @@ code.highlight.grace-loading {
     .markdownit.grace-loading,
     code.highlight.grace-loading {
         filter: unset;
-    }
-
-    .penrose-root svg {
-        filter: invert(1.0);
-        /* drop-shadow(0 0 5px #ffffff); */
     }
 }
 
