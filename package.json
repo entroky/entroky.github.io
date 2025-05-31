@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@mariohamann/activity-graph": "^1.0.0",
-    "@hpcc-js/wasm": "^2.22.1",
     "jsdom": "^26.1.0",
     "markdown-it": "^14.1.0",
     "package.json": "^2.0.1",
