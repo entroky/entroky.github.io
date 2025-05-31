@@ -2,7 +2,6 @@
   "dependencies": {
     "@mariohamann/activity-graph": "^1.0.0",
     "@hpcc-js/wasm": "^2.22.1",
-    "@penrose/core": "^3.2.0",
     "jsdom": "^26.1.0",
     "markdown-it": "^14.1.0",
     "package.json": "^2.0.1",
@@ -14,7 +13,6 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.2",
     "@elysiajs/static": "^1.1.1",
-    "@penrose/roger": "^3.2.0",
     "@types/bun": "^1.1.10",
     "autoprefixer": "^10.4.20",
     "elysia": "^1.1.16",
