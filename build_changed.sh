@@ -55,8 +55,6 @@ while IFS= read -r line; do
     just forest
   elif [[ $CHANGED_FILE == *".bib" ]]; then
     just bib
-  elif [[ $CHANGED_FILE == *".domain" ]] || [[ $CHANGED_FILE == *".style" ]] || [[ $CHANGED_FILE == *".substance" ]] || [[ $CHANGED_FILE == *".trio.json" ]]; then
-    just penrose $CHANGED_FILE_RELATIVE
   else
     echo "🤷 No action for $LINE"
   fi
