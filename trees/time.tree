@@ -1,62 +1,51 @@
 \import{macros}
-\title{Tailwind CSS Timeline for President Truman}
+\title{Truman Timeline with DaisyUI Component}
+\tag{history}
+\tag{us-presidents}
+\tag{truman}
+\tag{component}
+\tag{daisyui}
 
-\p{This page demonstrates a timeline built using macros that replicate a modern, responsive design from Tailwind CSS. To render correctly, the final HTML page must be linked to the Tailwind CSS framework.
+\p{
+  This timeline is generated using macros that replicate a DaisyUI timeline component. The final styling depends on the project's build system having access to Tailwind CSS and the DaisyUI plugin.
 }
 
-\strong{Icon Macros}
-\p{These macros define the SVG icons used for different types of events in the timeline.}
+\strong{Icon Definition}
+\p{A reusable macro for the timeline's SVG icon.}
 
-\def\icon-event-start{
-  \<html:svg>[class]{fill-emerald-500}[xmlns]{http://www.w3.org/2000/svg}[width]{16}[height]{16}{
-    \<html:path>[d]{M8 0a8 8 0 1 0 8 8 8.009 8.009 0 0 0-8-8Zm0 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z}{}
-  }
-}
-
-\def\icon-event-milestone{
-  \<html:svg>[xmlns]{http://www.w3.org/2000/svg}[width]{16}[height]{16}{
-    \<html:path>[class]{fill-slate-300}[d]{M14.853 6.861C14.124 10.348 10.66 13 6.5 13c-.102 0-.201-.016-.302-.019C7.233 13.618 8.557 14 10 14c.51 0 1.003-.053 1.476-.143L14.2 15.9a.499.499 0 0 0 .8-.4v-3.515c.631-.712 1-1.566 1-2.485 0-.987-.429-1.897-1.147-2.639Z}{}
-    \<html:path>[class]{fill-slate-500}[d]{M6.5 0C2.91 0 0 2.462 0 5.5c0 1.075.37 2.074 1 2.922V11.5a.5.5 0 0 0 .8.4l1.915-1.436c.845.34 1.787.536 2.785.536 3.59 0 6.5-2.462 6.5-5.5S10.09 0 6.5 0Z}{}
-  }
-}
-
-\def\icon-event-end{
-  \<html:svg>[class]{fill-red-500}[xmlns]{http://www.w3.org/2000/svg}[width]{16}[height]{16}{
-    \<html:path>[d]{M8 0a8 8 0 1 0 8 8 8.009 8.009 0 0 0-8-8Zm0 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z}{}
+\def\daisyui-timeline-icon{
+  \<html:svg>[xmlns]{http://www.w3.org/2000/svg}[viewBox]{0 0 20 20}[fill]{currentColor}[class]{h-5 w-5}{
+    \<html:path>[fill-rule]{evenodd}[d]{M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z}[clip-rule]{evenodd}{}
   }
 }
 
 \strong{Timeline Item Macro}
-\p{This macro generates a single event in the timeline.}
+\p{Generates a single event item for the timeline. The `side` parameter should be either 'start' or 'end'.}
 
-\def\timeline-item[icon][date][title][body]{
-  \<html:div>[class]{relative}{
-    \<html:div>[class]{md:flex items-center md:space-x-4 mb-3}{
-      \<html:div>[class]{flex items-center space-x-4 md:space-x-2 md:space-x-reverse}{
-        \<html:div>[class]{flex items-center justify-center w-10 h-10 rounded-full bg-white shadow md:order-1}{
-          \icon
-        }
-        \<html:time>[class]{text-sm font-medium text-indigo-500 md:w-28}{\date}
-      }
-      \<html:div>[class]{text-slate-500 ml-14}{\title}
+\def\daisyui-timeline-item[side][date][title][body]{
+  \<html:li>{
+    \<html:div>[class]{timeline-middle}{
+      \daisyui-timeline-icon
     }
-    \<html:div>[class]{bg-white p-4 rounded border border-slate-200 text-slate-500 shadow ml-14 md:ml-44}{\body}
+    \<html:div>[class]{timeline-\side mb-10 \if{\side=start}{md:text-end}{}}{
+      \<html:time>[class]{font-mono italic}{\date}
+      \<html:div>[class]{text-lg font-black}{\title}
+      \body
+    }
   }
 }
 
-\strong{Timeline Container Macro}
-\p{This macro provides the main wrapper for the timeline, including the vertical line.}
+\strong{Main Timeline Component}
+\p{The main wrapper for the timeline. Place `\daisyui-timeline-item` and `\hr` macros within its body.}
 
-\def\tailwind-timeline[body]{
-  \<html:section>[class]{relative flex flex-col justify-center bg-slate-50 overflow-hidden antialiased}{
-    \<html:div>[class]{w-full max-w-6xl mx-auto px-4 md:px-6 py-24}{
-      \<html:div>[class]{flex flex-col justify-center divide-y divide-slate-200 [&>*]:py-16}{
-        \<html:div>[class]{w-full max-w-3xl mx-auto}{
-          \<html:div>[class]{space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:ml-[8.75rem] md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent}{
-            \body
-          }
-        }
-      }
+\def\daisyui-timeline[body]{
+  \component{daisyui-timeline-component}{
+    /* CSS is handled by the external Tailwind/DaisyUI build process */
+  }{
+    /* No JS needed for this static component */
+  }{
+    \<html:ul>[class]{timeline timeline-snap-icon max-md:timeline-compact timeline-vertical}{
+      \body
     }
   }
 }
@@ -65,13 +54,14 @@
 
 \strong{Example Implementation: The Truman Timeline}
 
-\tailwind-timeline{
-  \timeline-item{\icon-event-start}{May 8, 1884}{\strong{Birth}}{Harry S. Truman is born in Lamar, Missouri.}
-  \timeline-item{\icon-event-milestone}{1917-1918}{\strong{World War I}}{Serves as an artillery captain in France, earning respect for his leadership.}
-  \timeline-item{\icon-event-start}{April 12, 1945}{\strong{Presidency Begins}}{Ascends to the presidency upon the death of Franklin D. Roosevelt.}
-  \timeline-item{\icon-event-milestone}{August 1945}{\strong{WWII Ends}}{Authorizes the use of atomic weapons on Hiroshima and Nagasaki, leading to the end of World War II.}
-  \timeline-item{\icon-event-milestone}{March 12, 1947}{\strong{Truman Doctrine}}{Announces the Truman Doctrine, establishing the U.S. policy of containment against Soviet expansion.}
-  \timeline-item{\icon-event-milestone}{Nov 2, 1948}{\strong{Election Upset}}{Wins a historic, surprise victory in the presidential election against Thomas E. Dewey.}
-  \timeline-item{\icon-event-milestone}{April 4, 1949}{\strong{NATO Formed}}{Oversees the formation of the North Atlantic Treaty Organization (NATO).}
-  \timeline-item{\icon-event-end}{Dec 26, 1972}{\strong{Death}}{Dies at the age of 88 in Kansas City, Missouri.}
+\daisyui-timeline{
+  \daisyui-timeline-item{start}{1884}{\strong{Birth}}{Harry S. Truman is born in Lamar, Missouri, to a farming family. His humble beginnings would shape his pragmatic and no-nonsense character.}
+  \hr
+  \daisyui-timeline-item{end}{1945}{\strong{The Presidency}}{Upon the death of Franklin D. Roosevelt, Truman is thrust into the presidency, inheriting the immense responsibility of ending World War II and shaping the post-war world.}
+  \hr
+  \daisyui-timeline-item{start}{1947}{\strong{The Truman Doctrine}}{He announces a new foreign policy of containment against Soviet expansionism, a pivotal moment that defined the Cold War for decades to come.}
+  \hr
+  \daisyui-timeline-item{end}{1948}{\strong{Historic Election Upset}}{Against all odds and defying every poll, Truman wins the presidential election. His tireless "whistle-stop" campaign and direct appeal to the people secured a legendary victory.}
+  \hr
+  \daisyui-timeline-item{start}{1953}{\strong{Return to Private Life}}{After choosing not to seek re-election, Truman returns to Independence, Missouri, leaving a legacy as one of America's most decisive and consequential presidents.}
 }
