@@ -1,9 +1,5 @@
+\import{macros}
 \title{Tailwind CSS Timeline for President Truman}
-\tag{history}
-\tag{us-presidents}
-\tag{truman}
-\tag{interactive}
-\tag{component}
 
 \p{
   This page demonstrates a timeline built using macros that replicate a modern, responsive design from Tailwind CSS. To render correctly, the final HTML page must be linked to the Tailwind CSS framework.
