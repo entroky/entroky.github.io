@@ -1,11 +1,5 @@
 \import{macros}
 \title{Truman Timeline with DaisyUI Component}
-\tag{history}
-\tag{us-presidents}
-\tag{truman}
-\tag{component}
-\tag{daisyui}
-
 \p{
   This timeline is generated using macros that replicate a DaisyUI timeline component. The final styling depends on the project's build system having access to Tailwind CSS and the DaisyUI plugin.
 }
